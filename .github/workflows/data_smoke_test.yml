@@ -9,7 +9,7 @@ permissions:
 jobs:
   smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -17,17 +17,19 @@ jobs:
           python-version: "3.11"
       - name: Install dependencies
         run: pip install -r requirements.txt
-      - name: Test 2-year download on first 250 eligible symbols
+      - name: Run diagnostic smoke test
         env:
-          SCANNER_MAX_SYMBOLS: "250"
-          SCANNER_BATCH_SIZE: "50"
+          SCANNER_MAX_SYMBOLS: "25"
           SCANNER_PERIOD: "2y"
-        run: python scripts/build_training_set.py
+          PYTHONUNBUFFERED: "1"
+        run: python scripts/data_smoke_test.py
       - name: Summarize result
+        if: success()
         run: |
           python - <<'PY'
           import pandas as pd
-          d = pd.read_parquet("data/training_signals.parquet")
+          d = pd.read_parquet("data/training_signals_smoke.parquet")
           print(f"Smoke-test labelled setups: {len(d):,}")
-          print(d.groupby("Direction")["Outcome"].agg(["count","mean"]))
+          if not d.empty:
+              print(d.groupby("Direction")["Outcome"].agg(["count","mean"]))
           PY

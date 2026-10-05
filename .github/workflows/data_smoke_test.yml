@@ -1,0 +1,33 @@
+name: Data Smoke Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Test 2-year download on first 250 eligible symbols
+        env:
+          SCANNER_MAX_SYMBOLS: "250"
+          SCANNER_BATCH_SIZE: "50"
+          SCANNER_PERIOD: "2y"
+        run: python scripts/build_training_set.py
+      - name: Summarize result
+        run: |
+          python - <<'PY'
+          import pandas as pd
+          d = pd.read_parquet("data/training_signals.parquet")
+          print(f"Smoke-test labelled setups: {len(d):,}")
+          print(d.groupby("Direction")["Outcome"].agg(["count","mean"]))
+          PY

@@ -5,9 +5,10 @@ from .features import add_features,classify_regime
 from .scan import score_candidate
 
 def _best_daily_candidates(df,ticker,config,regime=None):
-    rows=[]; warmup=220
+    rows=[]; warmup=220; min_price=float(config["universe"]["min_price"]); min_dollar=float(config["universe"]["min_avg_dollar_volume_20d"])
     for i in range(warmup,len(df)):
         row=df.iloc[i]; reg=str(regime.iloc[i]) if regime is not None and i<len(regime) else "Neutral"
+        if not np.isfinite(row.get("Close",np.nan)) or row.get("Close",0)<min_price or not np.isfinite(row.get("DollarVolume20",np.nan)) or row.get("DollarVolume20",0)<min_dollar: continue
         for direction in ("Long","Short"):
             candidates=[]
             for n in config["signal"]["consolidation_lengths"]:

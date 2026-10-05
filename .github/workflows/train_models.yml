@@ -1,0 +1,33 @@
+name: Train Scanner Models
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Build 10-year historical signal set
+        env:
+          SCANNER_PERIOD: "10y"
+          SCANNER_BATCH_SIZE: "50"
+        run: python scripts/build_training_set.py
+      - name: Train and validate long/short models
+        run: python scripts/train_models.py
+      - name: Commit model artifacts only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add models/ artifacts/
+          git diff --cached --quiet || git commit -m "Train scanner models"
+          git push

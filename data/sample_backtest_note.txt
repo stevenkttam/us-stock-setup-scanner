@@ -1,0 +1,2 @@
+No live backtest results are included in this V1 review package. The dashboard sample is illustrative only.
+Primary outcome definition: +2R before -1R within 10 trading sessions.

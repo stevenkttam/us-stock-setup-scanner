@@ -1,0 +1,46 @@
+universe:
+  min_price: 5.0
+  min_avg_dollar_volume_20d: 20000000
+  exchanges: [N, A, T]
+  include_adrs: true
+  exclude_etfs: true
+
+signal:
+  consolidation_lengths: [4, 5, 6, 7, 8, 10, 12, 15, 20]
+  consolidation_range_max: 0.12
+  atr10_atr40_max: 0.85
+  breakout_atr_min: 0.25
+  rvol20_min: 1.20
+  close_location_long_min: 0.65
+  close_location_short_max: 0.35
+  range_expansion_tr_min: 1.50
+
+trade:
+  primary_target_r: 2.0
+  stop_atr_multiple: 1.5
+  structure_buffer_atr: 0.25
+  holding_period_days: 10
+
+ranking:
+  initial_trade_probability_threshold: 0.70
+  watch_probability_floor: 0.60
+
+weights:
+  breakout: 0.20
+  volume: 0.20
+  consolidation: 0.15
+  trend: 0.15
+  volatility: 0.10
+  relative_strength: 0.10
+  regime: 0.10
+
+model:
+  type: logistic_regression
+  calibration: isotonic
+  min_training_samples: 1000
+  update_frequency: monthly
+
+intraday:
+  confirmation_timeframe: 15m
+  trigger_timeframe: 5m
+  recent_history_days: 60

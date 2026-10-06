@@ -1,0 +1,37 @@
+name: Historical Validation - 250 Stocks / 2 Years
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      PYTHONPATH: .
+      PYTHONUNBUFFERED: "1"
+      SCANNER_MAX_SYMBOLS: "250"
+      SCANNER_BATCH_SIZE: "50"
+      SCANNER_PERIOD: "2y"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Build 250-stock / 2-year labelled signal set
+        run: python scripts/build_training_set.py
+      - name: Summarize validation results
+        run: python scripts/summarize_validation.py
+      - name: Upload validation results
+        uses: actions/upload-artifact@v4
+        with:
+          name: validation-250-stocks-2y
+          path: |
+            data/training_signals.parquet
+            artifacts/validation_250_2y/
+          retention-days: 7

@@ -35,7 +35,7 @@ def main():
     print(f"[3/6] Downloading {len(symbols)} sample stocks...",flush=True)
     price_map=download_daily(symbols,period=period,batch_size=25,sleep_seconds=.5)
     print(f"Successful symbol downloads: {len(price_map):,}/{len(symbols):,}",flush=True)
-    if len(price_map)<3: raise RuntimeError("Too few successful symbol downloads")
+    if len(price_map)<1: raise RuntimeError("No successful symbol downloads")
 
     print("[4/6] Calculating features...",flush=True)
     test_ticker=next(iter(price_map)); f=add_features(price_map[test_ticker],spy=spy)

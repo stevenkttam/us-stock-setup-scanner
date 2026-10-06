@@ -19,8 +19,8 @@ def main():
         # This remains deterministic/reproducible while avoiding the prior
         # concentration in early-alphabet symbols.
         universe_sorted = list(dict.fromkeys(symbols))
-        picks = pd.Series(range(len(universe_sorted)))
-        picks = picks.linspace(0, len(universe_sorted) - 1, max_symbols).round().astype(int).tolist()
+        last = len(universe_sorted) - 1
+        picks = [round(j * last / (max_symbols - 1)) for j in range(max_symbols)] if max_symbols > 1 else [0]
         symbols = [universe_sorted[i] for i in picks]
     elif max_symbols:
         symbols = list(dict.fromkeys(symbols))[:max_symbols]

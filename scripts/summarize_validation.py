@@ -1,5 +1,6 @@
 from __future__ import annotations
 import json
+import os
 from pathlib import Path
 import pandas as pd
 from scanner.config import ROOT
@@ -56,7 +57,7 @@ def main():
     ).reset_index()
     score_band["binary_expectancy_R"] = 3 * score_band["success_rate"] - 1
 
-    out = ROOT / "artifacts" / "validation_250_2y"
+    out = ROOT / "artifacts" / os.getenv("VALIDATION_ARTIFACT_DIR", "validation_250_2y")
     out.mkdir(parents=True, exist_ok=True)
     (out / "summary.json").write_text(
         json.dumps(summary, indent=2), encoding="utf-8"

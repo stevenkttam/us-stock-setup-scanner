@@ -16,6 +16,7 @@ jobs:
       SCANNER_MAX_SYMBOLS: "500"
       SCANNER_BATCH_SIZE: "50"
       SCANNER_PERIOD: "3y"
+      VALIDATION_ARTIFACT_DIR: "validation_500_3y"
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
@@ -33,5 +34,5 @@ jobs:
           name: strategy-validation-500-stocks-3y
           path: |
             data/training_signals.parquet
-            artifacts/validation_250_2y/
+            artifacts/validation_500_3y/
           retention-days: 7

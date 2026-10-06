@@ -17,19 +17,42 @@ jobs:
           python-version: "3.11"
       - name: Install dependencies
         run: pip install -r requirements.txt
-      - name: Run diagnostic smoke test
-        env:
-          SCANNER_MAX_SYMBOLS: "25"
-          SCANNER_PERIOD: "2y"
-          PYTHONUNBUFFERED: "1"
-        run: python scripts/data_smoke_test.py
-      - name: Summarize result
-        if: success()
+      - name: 1 - Python and imports
+        run: |
+          python --version
+          python - <<'PY'
+          import pandas, numpy, yfinance, requests, yaml, sklearn, pyarrow
+          print("All core imports: OK")
+          PY
+      - name: 2 - Nasdaq Trader connectivity
         run: |
           python - <<'PY'
-          import pandas as pd
-          d = pd.read_parquet("data/training_signals_smoke.parquet")
-          print(f"Smoke-test labelled setups: {len(d):,}")
-          if not d.empty:
-              print(d.groupby("Direction")["Outcome"].agg(["count","mean"]))
+          import requests
+          u="https://www.nasdaqtrader.com/dynamic/SymDir/nasdaqtraded.txt"
+          r=requests.get(u,headers={"User-Agent":"USStockSetupScanner/1.0"},timeout=30)
+          print("HTTP status:",r.status_code)
+          print("Bytes:",len(r.content))
+          r.raise_for_status()
+          print("Nasdaq Trader: OK")
           PY
+      - name: 3 - Universe parsing
+        run: |
+          python - <<'PY'
+          from scanner.universe import fetch_us_universe
+          d=fetch_us_universe(refresh=True)
+          print("Universe rows:",len(d))
+          print(d.head(10).to_string(index=False))
+          if len(d) == 0: raise RuntimeError("Universe is empty")
+          PY
+      - name: 4 - Yahoo Finance SPY download
+        run: |
+          python - <<'PY'
+          import yfinance as yf
+          d=yf.download("SPY",period="2y",interval="1d",auto_adjust=False,progress=False,multi_level_index=True)
+          print("SPY rows:",len(d))
+          print("SPY columns:",list(d.columns))
+          if d.empty: raise RuntimeError("SPY data empty")
+          PY
+      - name: 5 - One-stock end-to-end test
+        run: |
+          SCANNER_MAX_SYMBOLS=1 SCANNER_PERIOD=2y python scripts/data_smoke_test.py

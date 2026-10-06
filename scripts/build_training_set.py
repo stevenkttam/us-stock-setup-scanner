@@ -4,7 +4,7 @@ from pathlib import Path
 import pandas as pd
 import yfinance as yf
 from scanner.config import ROOT,load_config
-from scanner.data import download_daily
+from scanner.data import download_daily, _normalize_yf_frame
 from scanner.historical import build_historical_signals,add_outcomes
 from scanner.universe import fetch_us_universe
 
@@ -14,8 +14,9 @@ def main():
     symbols=universe["YahooSymbol"].dropna().tolist() if "YahooSymbol" in universe.columns else universe["Symbol"].dropna().tolist()
     max_symbols=int(os.getenv("SCANNER_MAX_SYMBOLS","0")); symbols=symbols[:max_symbols] if max_symbols else symbols
     batch_size=int(os.getenv("SCANNER_BATCH_SIZE","50")); period=os.getenv("SCANNER_PERIOD","10y")
-    spy=yf.download("SPY",period=period,interval="1d",auto_adjust=False,progress=False)
-    if isinstance(spy.columns,pd.MultiIndex): spy=spy.xs("SPY",axis=1,level=0)
+    spy_raw=yf.download("SPY",period=period,interval="1d",auto_adjust=False,progress=False,multi_level_index=True)
+    spy=_normalize_yf_frame(spy_raw,"SPY")
+    if spy.empty: raise RuntimeError("SPY historical data download returned no usable rows")
     completed=0
     for start in range(0,len(symbols),batch_size):
         chunk=symbols[start:start+batch_size]; chunk_id=start//batch_size+1; out=chunks_dir/f"signals_{chunk_id:04d}.parquet"

@@ -28,7 +28,7 @@ jobs:
       - name: Summarize validation results
         run: python scripts/summarize_validation.py
       - name: Upload validation results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: validation-250-stocks-2y
           path: |

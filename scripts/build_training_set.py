@@ -12,7 +12,18 @@ def main():
     cfg=load_config(); data_dir=ROOT/"data"; chunks_dir=data_dir/"training_chunks"; chunks_dir.mkdir(parents=True,exist_ok=True)
     universe=fetch_us_universe(data_dir/"universe.csv")
     symbols=universe["YahooSymbol"].dropna().tolist() if "YahooSymbol" in universe.columns else universe["Symbol"].dropna().tolist()
-    max_symbols=int(os.getenv("SCANNER_MAX_SYMBOLS","0")); symbols=symbols[:max_symbols] if max_symbols else symbols
+    max_symbols = int(os.getenv("SCANNER_MAX_SYMBOLS", "0"))
+    if max_symbols and len(symbols) > max_symbols:
+        # For validation runs, spread the sample across the full current US
+        # universe instead of taking the first tickers alphabetically.
+        # This remains deterministic/reproducible while avoiding the prior
+        # concentration in early-alphabet symbols.
+        universe_sorted = list(dict.fromkeys(symbols))
+        picks = pd.Series(range(len(universe_sorted)))
+        picks = picks.linspace(0, len(universe_sorted) - 1, max_symbols).round().astype(int).tolist()
+        symbols = [universe_sorted[i] for i in picks]
+    elif max_symbols:
+        symbols = list(dict.fromkeys(symbols))[:max_symbols]
     batch_size=int(os.getenv("SCANNER_BATCH_SIZE","50")); period=os.getenv("SCANNER_PERIOD","10y")
     spy_raw=yf.download("SPY",period=period,interval="1d",auto_adjust=False,progress=False,multi_level_index=True)
     spy=_normalize_yf_frame(spy_raw,"SPY")

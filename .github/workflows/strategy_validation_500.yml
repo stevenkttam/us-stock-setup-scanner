@@ -1,0 +1,37 @@
+name: Strategy Validation - 500 Stocks / 3 Years
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      PYTHONPATH: .
+      PYTHONUNBUFFERED: "1"
+      SCANNER_MAX_SYMBOLS: "500"
+      SCANNER_BATCH_SIZE: "50"
+      SCANNER_PERIOD: "3y"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Build 500-stock / 3-year labelled signal set
+        run: python scripts/build_training_set.py
+      - name: Summarize validation results
+        run: python scripts/summarize_validation.py
+      - name: Upload validation results
+        uses: actions/upload-artifact@v7
+        with:
+          name: strategy-validation-500-stocks-3y
+          path: |
+            data/training_signals.parquet
+            artifacts/validation_250_2y/
+          retention-days: 7

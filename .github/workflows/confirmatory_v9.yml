@@ -1,0 +1,33 @@
+name: Confirmatory Edge Test V9 - Fresh 1000 Stocks / 10 Years
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  confirm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      PYTHONPATH: .
+      PYTHONUNBUFFERED: "1"
+      SCANNER_MAX_SYMBOLS: "1000"
+      SCANNER_BATCH_SIZE: "50"
+      SCANNER_PERIOD: "10y"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run frozen confirmatory test
+        run: python scripts/confirmatory_v9.py
+      - name: Upload V9 results
+        uses: actions/upload-artifact@v7
+        with:
+          name: confirmatory-v9-fresh-1000-10y
+          path: artifacts/confirmatory_v9/
+          retention-days: 7

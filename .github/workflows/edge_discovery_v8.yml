@@ -1,0 +1,40 @@
+name: Broad Edge Discovery V8 - 500 Stocks / 10 Years
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      PYTHONPATH: .
+      PYTHONUNBUFFERED: "1"
+      SCANNER_MAX_SYMBOLS: "500"
+      SCANNER_BATCH_SIZE: "50"
+      SCANNER_PERIOD: "10y"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Build 10-year labelled signals
+        run: python scripts/build_training_set.py
+      - name: Build alternate target/horizon outcomes
+        run: python scripts/edge_discovery_v8_outcomes.py
+      - name: Run broad edge discovery
+        run: python scripts/edge_discovery_v8.py
+      - name: Upload V8 results
+        uses: actions/upload-artifact@v7
+        with:
+          name: broad-edge-discovery-v8-500-10y
+          path: |
+            artifacts/edge_discovery_v8/
+            data/edge_discovery_v8_outcomes.parquet
+            data/training_signals.parquet
+          retention-days: 7

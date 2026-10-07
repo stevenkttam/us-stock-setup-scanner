@@ -51,6 +51,7 @@ def build_model() -> CalibratedClassifierCV:
 
 def prepare_training(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
     x = add_model_features(df)
+    x["SignalDate"] = pd.to_datetime(x["SignalDate"], errors="coerce")
     x = x.replace([np.inf, -np.inf], np.nan).dropna(subset=FEATURES + ["Outcome", "SignalDate"])
     x = x.sort_values("SignalDate")
     return x, x["Outcome"].astype(int)

@@ -2,14 +2,11 @@ from __future__ import annotations
 
 import json
 import os
-from pathlib import Path
-
 import numpy as np
 import pandas as pd
 
 from scanner.config import ROOT
 from scanner.data import download_daily
-from scanner.universe import fetch_us_universe
 
 
 HOLDING_DAYS = 10
@@ -137,21 +134,22 @@ def _evaluate_trade(prices: pd.DataFrame, signal_idx: int, s: pd.Series,
     if future.empty:
         return 0, np.nan, "no_future_bars"
 
-    # Opening gaps through a level are handled explicitly.
-    if direction == "Long":
-        if entry >= target:
-            return 1, (entry - signal_close) / max(abs(signal_close - stop), 1e-12), "target_at_open"
-        if entry <= stop:
-            return 0, (entry - signal_close) / max(abs(signal_close - stop), 1e-12), "stop_at_open"
-    else:
-        if entry <= target:
-            return 1, (signal_close - entry) / max(abs(signal_close - stop), 1e-12), "target_at_open"
-        if entry >= stop:
-            return 0, (signal_close - entry) / max(abs(signal_close - stop), 1e-12), "stop_at_open"
-
     risk = abs(entry - stop)
     if risk <= 0:
         return 0, np.nan, "zero_risk"
+
+    # Opening gaps through a level are handled explicitly using the actual
+    # execution risk of the selected variant.
+    if direction == "Long":
+        if entry >= target:
+            return 1, (entry - signal_close) / risk, "target_at_open"
+        if entry <= stop:
+            return 0, (entry - signal_close) / risk, "stop_at_open"
+    else:
+        if entry <= target:
+            return 1, (signal_close - entry) / risk, "target_at_open"
+        if entry >= stop:
+            return 0, (signal_close - entry) / risk, "stop_at_open"
 
     for _, bar in future.iterrows():
         high = _safe_float(bar["High"])
@@ -253,15 +251,19 @@ def _summary(df: pd.DataFrame, by: list[str]) -> pd.DataFrame:
     if df.empty:
         return pd.DataFrame()
     def agg(g):
-        n = len(g)
+        filtered = g["Reason"].eq("gap_filtered")
+        h = g.loc[~filtered].copy()
+        n = len(h)
         return pd.Series({
+            "Rows": len(g),
             "N": n,
-            "SuccessRate": float(g["Outcome"].mean()) if n else np.nan,
-            "BinaryExpectancyR": float(3.0 * g["Outcome"].mean() - 1.0) if n else np.nan,
-            "MeanRealizedR": float(g["RealizedR"].mean()) if n else np.nan,
-            "MedianRealizedR": float(g["RealizedR"].median()) if n else np.nan,
-            "GapFiltered": int((g["Reason"] == "gap_filtered").sum()),
-            "Timeouts": int((g["Reason"] == "timeout").sum()),
+            "SuccessRate": float(h["Outcome"].mean()) if n else np.nan,
+            "BinaryExpectancyR": float(3.0 * h["Outcome"].mean() - 1.0) if n else np.nan,
+            "MeanRealizedR": float(h["RealizedR"].mean()) if n else np.nan,
+            "MedianRealizedR": float(h["RealizedR"].median()) if n else np.nan,
+            "GapFiltered": int(filtered.sum()),
+            "GapFilterPct": float(filtered.mean()) if len(g) else np.nan,
+            "Timeouts": int(h["Reason"].eq("timeout").sum()),
         })
     return df.groupby(by, dropna=False).apply(agg, include_groups=False).reset_index()
 

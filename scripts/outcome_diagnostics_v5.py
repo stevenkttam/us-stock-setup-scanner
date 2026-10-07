@@ -102,7 +102,8 @@ def main():
         sleep_seconds=0.75,
     )
 
-    rows = []
+    mfe_rows = []
+    target_rows = []
     for _, s in d.iterrows():
         px = prices.get(str(s["Ticker"]))
         if px is None or px.empty:
@@ -129,7 +130,7 @@ def main():
                 outcome, mfe, mae, reason = evaluate(
                     px, int(idx), str(s["Direction"]), risk, horizon, 1.0
                 )
-                rows.append({
+                mfe_rows.append({
                     "Ticker": s["Ticker"],
                     "SignalDate": s["SignalDate"],
                     "Direction": s["Direction"],
@@ -147,7 +148,7 @@ def main():
                     outcome, mfe2, mae2, reason2 = evaluate(
                         px, int(idx), str(s["Direction"]), risk, horizon, target_r
                     )
-                    rows.append({
+                    target_rows.append({
                         "Ticker": s["Ticker"],
                         "SignalDate": s["SignalDate"],
                         "Direction": s["Direction"],
@@ -156,19 +157,16 @@ def main():
                         "RiskModel": risk_name,
                         "HorizonDays": horizon,
                         "TargetR": target_r,
-                        "MFE_R": mfe2,
-                        "MAE_R": mae2,
                         "Outcome": outcome,
                         "Reason": reason2,
                     })
 
     out = ROOT / "artifacts" / "outcome_diagnostics_v5"
     out.mkdir(parents=True, exist_ok=True)
-    raw = pd.DataFrame(rows)
-    if raw.empty:
+    mfe = pd.DataFrame(mfe_rows)
+    targets = pd.DataFrame(target_rows)
+    if mfe.empty or targets.empty:
         raise ValueError("No diagnostic rows")
-
-    mfe = raw.dropna(subset=["MFE_R", "MAE_R"]).copy()
     mfe_summary = (
         mfe.groupby(["Direction", "Setup", "RiskModel", "HorizonDays"], dropna=False)
         .agg(
@@ -183,7 +181,6 @@ def main():
         .reset_index()
     )
 
-    targets = raw.dropna(subset=["TargetR", "Outcome"]).copy()
     target_summary = (
         targets.groupby(["Direction", "Setup", "RiskModel", "HorizonDays", "TargetR"], dropna=False)
         .agg(
@@ -206,20 +203,6 @@ def main():
         1 + target_direction["TargetR"]
     ) - 1.0
 
-    # Descriptive consistency table: positive binary expectancy in at least
-    # three of the four named calendar periods is intentionally NOT selected
-    # here because this version focuses on diagnostics rather than optimization.
-    raw["CalendarHalf"] = np.select(
-        [
-            raw["SignalDate"].dt.to_period("M").between(pd.Period("2025-01"), pd.Period("2025-06")),
-            raw["SignalDate"].dt.to_period("M").between(pd.Period("2025-07"), pd.Period("2025-12")),
-            raw["SignalDate"].dt.to_period("M").between(pd.Period("2026-01"), pd.Period("2026-06")),
-            raw["SignalDate"].dt.to_period("M").between(pd.Period("2026-07"), pd.Period("2026-12")),
-        ],
-        ["2025-H1", "2025-H2", "2026-H1", "2026-H2"],
-        default="pre-2025",
-    )
-
     summary = {
         "signals_input": int(len(d)),
         "tickers_with_signals": int(d["Ticker"].nunique()),
@@ -233,7 +216,8 @@ def main():
     mfe_summary.to_csv(out / "mfe_mae_summary.csv", index=False)
     target_summary.to_csv(out / "target_horizon_by_setup.csv", index=False)
     target_direction.to_csv(out / "target_horizon_direction.csv", index=False)
-    raw.to_parquet(out / "diagnostic_rows.parquet", index=False)
+    mfe.to_parquet(out / "mfe_mae_rows.parquet", index=False)
+    targets.to_parquet(out / "target_rows.parquet", index=False)
     (out / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
 
     print(json.dumps(summary, indent=2))

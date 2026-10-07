@@ -33,72 +33,78 @@ def half_label(ts):
 
 
 def detect_vcp(d, ticker, cfg, regime):
-    rows=[]
-    min_price=float(cfg["universe"]["min_price"])
-    min_dv=float(cfg["universe"]["min_avg_dollar_volume_20d"])
+    rows = []
+    min_price = float(cfg["universe"]["min_price"])
+    min_dv = float(cfg["universe"]["min_avg_dollar_volume_20d"])
+    rvol_min = float(cfg["signal"]["rvol20_min"])
+    breakout_min = float(cfg["signal"]["breakout_atr_min"])
+    loc_long = float(cfg["signal"]["close_location_long_min"])
+    loc_short = float(cfg["signal"]["close_location_short_max"])
+
     for i in range(WARMUP, len(d)):
-        row=d.iloc[i]
-        close=f(row["Close"])
-        atr=f(row["ATR20"])
-        rvol=f(row["RVOL20"])
-        loc=f(row["CloseLocation"])
-        dv=f(row["DollarVolume20"])
-        resistance=f(row["HH_15"])
-        if not all(np.isfinite(x) for x in [close, atr, rvol, loc, dv, resistance]):
+        row = d.iloc[i]
+        close = f(row["Close"])
+        atr = f(row["ATR20"])
+        rvol = f(row["RVOL20"])
+        loc = f(row["CloseLocation"])
+        dv = f(row["DollarVolume20"])
+        resistance = f(row["HH_15"])
+        support = f(row["LL_15"])
+        if not all(np.isfinite(x) for x in [close, atr, rvol, loc, dv, resistance, support]):
             continue
-        if close < min_price or dv < min_dv or rvol < float(cfg["signal"]["rvol20_min"]):
-            continue
-        if close <= resistance or loc < float(cfg["signal"]["close_location_long_min"]):
-            continue
-        br=(close-resistance)/atr
-        if br < float(cfg["signal"]["breakout_atr_min"]):
+        if close < min_price or dv < min_dv or rvol < rvol_min:
             continue
 
-        base=d.iloc[i-15:i]
-        segs=[base.iloc[:5],base.iloc[5:10],base.iloc[10:15]]
-        ranges=[(s["High"].max()-s["Low"].min())/s["Close"].mean() for s in segs]
-        vols=[s["Volume"].mean() for s in segs]
-        atr_ratio=f(row["ATR10"])/f(row["ATR40"]) if f(row["ATR40"])>0 else np.nan
+        atr_ratio = f(row["ATR10"]) / f(row["ATR40"]) if f(row["ATR40"]) > 0 else np.nan
         if not np.isfinite(atr_ratio):
             continue
 
-        for name,v in VARIANTS.items():
-            rd=v["range_decay"]; vd=v["volume_decay"]
-            range_ok=(ranges[1] <= ranges[0]*rd) and (ranges[2] <= ranges[1]*rd)
-            vol_ok=(vols[1] <= vols[0]*vd) and (vols[2] <= vols[1]*vd)
-            if not (range_ok and vol_ok and atr_ratio <= v["atr_ratio_max"]):
+        base = d.iloc[i - 15:i]
+        segs = [base.iloc[:5], base.iloc[5:10], base.iloc[10:15]]
+        ranges = [
+            (s["High"].max() - s["Low"].min()) / s["Close"].mean()
+            for s in segs
+        ]
+        vols = [s["Volume"].mean() for s in segs]
+
+        for direction in ["Long", "Short"]:
+            if direction == "Long":
+                breakout = (close - resistance) / atr
+                directional_ok = close > resistance and loc >= loc_long and breakout >= breakout_min
+            else:
+                breakout = (support - close) / atr
+                directional_ok = close < support and loc <= loc_short and breakout >= breakout_min
+
+            if not directional_ok:
                 continue
-            rows.append({
-                "Ticker":ticker,"SignalDate":pd.Timestamp(d.index[i]),"Direction":"Long",
-                "Variant":name,"RVOL20":rvol,"BreakoutATR":br,
-                "CloseLocation":loc,"BaseRangePct":ranges[-1],"ATRCompression":1-atr_ratio,
-                "Trend20":f(row["Trend20"]),"Trend50":f(row["Trend50"]),"RS_SPY_20":f(row["RS_SPY_20"]),
-                "MarketRegime":str(regime.iloc[i]),"ATR20":atr,"CloseSignal":close,
-                "SignalRisk":atr,"SetupScore":np.nan
-            })
-        # mirrored downside VCP
-        if close >= resistance:
-            pass
-        support=f(row["LL_15"])
-        if not np.isfinite(support) or close >= support or loc > float(cfg["signal"]["close_location_short_max"]):
-            continue
-        brd=(support-close)/atr
-        if brd < float(cfg["signal"]["breakout_atr_min"]):
-            continue
-        for name,v in VARIANTS.items():
-            rd=v["range_decay"]; vd=v["volume_decay"]
-            range_ok=(ranges[1] <= ranges[0]*rd) and (ranges[2] <= ranges[1]*rd)
-            vol_ok=(vols[1] <= vols[0]*vd) and (vols[2] <= vols[1]*vd)
-            if not (range_ok and vol_ok and atr_ratio <= v["atr_ratio_max"]):
-                continue
-            rows.append({
-                "Ticker":ticker,"SignalDate":pd.Timestamp(d.index[i]),"Direction":"Short",
-                "Variant":name,"RVOL20":rvol,"BreakoutATR":brd,
-                "CloseLocation":loc,"BaseRangePct":ranges[-1],"ATRCompression":1-atr_ratio,
-                "Trend20":f(row["Trend20"]),"Trend50":f(row["Trend50"]),"RS_SPY_20":f(row["RS_SPY_20"]),
-                "MarketRegime":str(regime.iloc[i]),"ATR20":atr,"CloseSignal":close,
-                "SignalRisk":atr,"SetupScore":np.nan
-            })
+
+            for name, v in VARIANTS.items():
+                rd = v["range_decay"]
+                vd = v["volume_decay"]
+                range_ok = (ranges[1] <= ranges[0] * rd) and (ranges[2] <= ranges[1] * rd)
+                vol_ok = (vols[1] <= vols[0] * vd) and (vols[2] <= vols[1] * vd)
+                if not (range_ok and vol_ok and atr_ratio <= v["atr_ratio_max"]):
+                    continue
+
+                rows.append({
+                    "Ticker": ticker,
+                    "SignalDate": pd.Timestamp(d.index[i]),
+                    "Direction": direction,
+                    "Variant": name,
+                    "RVOL20": rvol,
+                    "BreakoutATR": breakout,
+                    "CloseLocation": loc,
+                    "BaseRangePct": ranges[-1],
+                    "ATRCompression": 1 - atr_ratio,
+                    "Trend20": f(row["Trend20"]),
+                    "Trend50": f(row["Trend50"]),
+                    "RS_SPY_20": f(row["RS_SPY_20"]),
+                    "MarketRegime": str(regime.iloc[i]),
+                    "ATR20": atr,
+                    "CloseSignal": close,
+                    "SignalRisk": atr,
+                    "SetupScore": np.nan,
+                })
     return pd.DataFrame(rows)
 
 

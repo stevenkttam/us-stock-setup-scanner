@@ -1,0 +1,34 @@
+name: VCP Pattern Validation V6 - 500 Stocks / 3 Years
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      PYTHONPATH: .
+      PYTHONUNBUFFERED: "1"
+      SCANNER_MAX_SYMBOLS: "500"
+      SCANNER_BATCH_SIZE: "50"
+      SCANNER_PERIOD: "3y"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run VCP pattern validation
+        run: python scripts/vcp_validation_v6.py
+      - name: Upload V6 validation artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: vcp-validation-v6-500-3y
+          path: |
+            artifacts/vcp_validation_v6/
+          retention-days: 7

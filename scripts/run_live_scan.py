@@ -28,6 +28,9 @@ def main():
         except Exception as exc: print(f"SKIP {yahoo_ticker}: {exc}")
     candidates=pd.DataFrame(rows)
     if candidates.empty: raise SystemExit("No candidates generated.")
+    candidates["MarketRegimeNum"] = candidates["MarketRegime"].astype(str).map(
+        lambda v: 1.0 if v.startswith("Bullish") else (-1.0 if v.startswith("Bearish") else 0.0)
+    )
     for direction in ["Long","Short"]:
         path=models_dir/f"{direction.lower()}_probability.joblib"; mask=candidates["Direction"].eq(direction)
         if not path.exists(): candidates.loc[mask,"Probability"]=pd.NA; continue

@@ -49,3 +49,10 @@ The live whole-universe pipeline should be completed in this order:
 ## Configuration
 
 All primary thresholds are in `config.yaml`. Initial thresholds are deliberately exposed so the backtest can determine the eventual optimal ranges.
+
+
+## Current research direction
+
+The original daily technical framework failed the V9 independent confirmation test. The next research stage is V2 Context Enrichment, implemented in scripts/context_research_v10.py. It adds research-sample market breadth, SPY/QQQ/IWM market context, VIX regime, sector ETF breadth/dispersion, an inferred sector-relative-strength proxy, and next-open gap diagnostics. This workflow is research-only and does not enable live probabilities.
+
+The V2 test uses a fresh 1,000-stock partition after the deterministic V8 and V9 research samples, with a chronological validation/holdout comparison against the existing V2 feature set. Current-universe survivorship bias remains.

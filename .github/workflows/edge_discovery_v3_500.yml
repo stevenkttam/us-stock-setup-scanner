@@ -1,0 +1,37 @@
+name: Edge Discovery V3 - 500 Stocks / 3 Years
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      PYTHONPATH: .
+      PYTHONUNBUFFERED: "1"
+      SCANNER_MAX_SYMBOLS: "500"
+      SCANNER_BATCH_SIZE: "50"
+      SCANNER_PERIOD: "3y"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Build labelled signal set
+        run: python scripts/build_training_set.py
+      - name: Run validation-only edge discovery
+        run: python scripts/edge_discovery_v3.py
+      - name: Upload edge discovery results
+        uses: actions/upload-artifact@v7
+        with:
+          name: edge-discovery-v3-500-3y
+          path: |
+            artifacts/edge_discovery_v3/
+            data/training_signals.parquet
+          retention-days: 7

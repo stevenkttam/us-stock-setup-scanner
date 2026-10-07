@@ -1,0 +1,37 @@
+name: Trade Mechanics V4 - 500 Stocks / 3 Years
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mechanics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      PYTHONPATH: .
+      PYTHONUNBUFFERED: "1"
+      SCANNER_MAX_SYMBOLS: "500"
+      SCANNER_BATCH_SIZE: "50"
+      SCANNER_PERIOD: "3y"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Build 500-stock / 3-year labelled signal set
+        run: python scripts/build_training_set.py
+      - name: Run V4 trade mechanics and walk-forward analysis
+        run: python scripts/trade_mechanics_v4.py
+      - name: Upload V4 mechanics results
+        uses: actions/upload-artifact@v7
+        with:
+          name: trade-mechanics-v4-500-3y
+          path: |
+            artifacts/trade_mechanics_v4/
+            data/training_signals.parquet
+          retention-days: 7

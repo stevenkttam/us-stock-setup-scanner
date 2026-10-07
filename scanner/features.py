@@ -46,7 +46,7 @@ def add_features(df: pd.DataFrame, spy: pd.DataFrame | None = None) -> pd.DataFr
     d["Trend20"] = (d["Close"] - d["EMA20"]) / d["ATR20"]
     d["Trend50"] = (d["EMA20"] - d["EMA50"]) / d["ATR20"]
     d["Trend200"] = (d["EMA50"] - d["EMA200"]) / d["ATR20"]
-    d["Return20"] = d["Close"].pct_change(20)
+    d["Return20"] = d["Close"].pct_change(20, fill_method=None)
     d["GapPct"] = d["Open"] / d["Close"].shift(1) - 1
 
     if spy is not None:

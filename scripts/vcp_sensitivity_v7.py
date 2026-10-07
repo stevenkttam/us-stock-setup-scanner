@@ -151,10 +151,16 @@ def main():
     regime = classify_regime(spy)
 
     all_signals = []
+    feature_map = {}
+    regime_map = {}
+    atr_map = {}
     for ticker, px in prices.items():
         try:
             feat = add_features(px, spy=spy)
             reg = regime.reindex(feat.index).ffill().fillna("Neutral")
+            feature_map[ticker] = feat
+            regime_map[ticker] = reg
+            atr_map[ticker] = feat["ATR20"]
             for name, rule in RULES.items():
                 rows = detect(feat, ticker, reg, cfg, name, rule)
                 all_signals.extend(rows)
@@ -179,7 +185,8 @@ def main():
             continue
         if isinstance(idx, slice) or idx+1 >= len(px):
             continue
-        atr = f(add_features(px, spy=spy).loc[pd.Timestamp(s["SignalDate"]), "ATR20"]) if pd.Timestamp(s["SignalDate"]) in px.index else np.nan
+        atr_series = atr_map.get(str(s["Ticker"]))
+        atr = f(atr_series.get(pd.Timestamp(s["SignalDate"]), np.nan)) if atr_series is not None else np.nan
         for h in HORIZONS:
             for target in TARGETS:
                 o, reason = outcome(px, int(idx), str(s["Direction"]), atr, h, target)

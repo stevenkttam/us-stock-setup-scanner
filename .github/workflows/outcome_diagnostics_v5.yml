@@ -1,0 +1,37 @@
+name: Outcome Diagnostics V5 - 500 Stocks / 3 Years
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnostics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      PYTHONPATH: .
+      PYTHONUNBUFFERED: "1"
+      SCANNER_MAX_SYMBOLS: "500"
+      SCANNER_BATCH_SIZE: "50"
+      SCANNER_PERIOD: "3y"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Build 500-stock / 3-year labelled signal set
+        run: python scripts/build_training_set.py
+      - name: Run outcome diagnostics
+        run: python scripts/outcome_diagnostics_v5.py
+      - name: Upload V5 diagnostic artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: outcome-diagnostics-v5-500-3y
+          path: |
+            artifacts/outcome_diagnostics_v5/
+            data/training_signals.parquet
+          retention-days: 7

@@ -23,6 +23,8 @@ jobs:
           python-version: "3.11"
       - name: Install dependencies
         run: pip install -r requirements.txt
+      - name: V2 model synthetic smoke test
+        run: python scripts/test_model_v2.py
       - name: Build V2 labelled signal set
         run: python scripts/build_training_set.py
       - name: Train and evaluate V2 models

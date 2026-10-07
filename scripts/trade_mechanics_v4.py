@@ -84,6 +84,11 @@ def _trade_levels(s: pd.Series, entry: float, variant: dict) -> tuple[float, flo
         risk = abs(atr * float(variant["atr_mult"]))
         stop = entry - sign * risk
         target = entry + sign * 2.0 * risk
+    elif variant["kind"] == "gap_guard":
+        # Gap guards change eligibility, not the underlying entry/risk model.
+        risk = abs(close - signal_stop)
+        stop = entry - sign * risk
+        target = entry + sign * 2.0 * risk
     elif variant["kind"] == "signal_close":
         risk = abs(close - signal_stop)
         stop = close - sign * risk

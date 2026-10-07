@@ -1,0 +1,39 @@
+name: Probability Model V2 Validation - 500 Stocks / 3 Years
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      PYTHONPATH: .
+      PYTHONUNBUFFERED: "1"
+      SCANNER_MAX_SYMBOLS: "500"
+      SCANNER_BATCH_SIZE: "50"
+      SCANNER_PERIOD: "3y"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Build V2 labelled signal set
+        run: python scripts/build_training_set.py
+      - name: Train and evaluate V2 models
+        run: python scripts/train_models_v2.py
+      - name: Upload V2 validation artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: probability-model-v2-validation-500-3y
+          path: |
+            models/v2/*.json
+            models/v2/*.joblib
+            artifacts/probability_v2_500_3y/
+            data/training_signals.parquet
+          retention-days: 7

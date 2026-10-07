@@ -1,0 +1,38 @@
+name: Research V2 Context Enrichment - Fresh 1000 Stocks / 10 Years
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/context_research_v10.py"
+      - ".github/workflows/context_research_v10.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    env:
+      PYTHONPATH: .
+      PYTHONUNBUFFERED: "1"
+      SCANNER_MAX_SYMBOLS: "1000"
+      SCANNER_BATCH_SIZE: "50"
+      SCANNER_PERIOD: "10y"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run V2 context enrichment research
+        run: python scripts/context_research_v10.py
+      - name: Upload context research results
+        uses: actions/upload-artifact@v7
+        with:
+          name: context-v10-fresh-1000-10y
+          path: artifacts/context_v10/
+          retention-days: 14

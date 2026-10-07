@@ -163,13 +163,23 @@ def build_hist_gradient_boosting() -> CalibratedClassifierCV:
     )
 
 
-def _date_split(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def _split_boundaries(df: pd.DataFrame) -> tuple[pd.Timestamp, pd.Timestamp]:
     dates = pd.Series(df["SignalDate"].drop_duplicates().sort_values().tolist())
     if len(dates) < 60:
         raise ValueError("Not enough unique signal dates for train/validation/holdout split.")
+    return (
+        pd.Timestamp(dates.iloc[int(len(dates) * 0.60)]),
+        pd.Timestamp(dates.iloc[int(len(dates) * 0.75)]),
+    )
 
-    train_end = dates.iloc[int(len(dates) * 0.60)]
-    valid_end = dates.iloc[int(len(dates) * 0.75)]
+
+def _date_split(
+    df: pd.DataFrame,
+    train_end: pd.Timestamp | None = None,
+    valid_end: pd.Timestamp | None = None,
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    if train_end is None or valid_end is None:
+        train_end, valid_end = _split_boundaries(df)
 
     train = df[df["SignalDate"] < train_end].copy()
     valid = df[(df["SignalDate"] >= train_end) & (df["SignalDate"] < valid_end)].copy()
@@ -242,7 +252,8 @@ def _model_rank_key(metrics: dict[str, Any]) -> tuple[float, float, float]:
 def train_and_validate_v2(df: pd.DataFrame, direction: str) -> tuple[Any, dict[str, Any]]:
     clean = add_v2_features(df)
     clean_v1 = _prepare_v1(df)
-    train, valid, holdout = _date_split(clean)
+    train_end, valid_end = _split_boundaries(clean)
+    train, valid, holdout = _date_split(clean, train_end, valid_end)
 
     candidates = {
         "Logistic V1 Baseline": build_logistic_v1_baseline(),
@@ -252,19 +263,19 @@ def train_and_validate_v2(df: pd.DataFrame, direction: str) -> tuple[Any, dict[s
 
     validation = {}
 
-    baseline_train, baseline_valid, baseline_holdout = _date_split(clean_v1)
-    v1_split_matches = (
-        baseline_valid["SignalDate"].min() == valid["SignalDate"].min()
-        and baseline_holdout["SignalDate"].min() == holdout["SignalDate"].min()
+    baseline_train, baseline_valid, baseline_holdout = _date_split(
+        clean_v1, train_end, valid_end
     )
-    if not v1_split_matches:
-        raise ValueError("V1 baseline and V2 sample do not share the same chronological boundaries.")
 
-    v1_model = candidates["Logistic V1 Baseline"]
-    p_valid = v1_model.fit(
-        baseline_train[V1_NUMERIC_FEATURES], baseline_train["Outcome"]
-    ).predict_proba(baseline_valid[V1_NUMERIC_FEATURES])[:, 1]
-    validation["Logistic V1 Baseline"] = _metrics(baseline_valid["Outcome"], p_valid)
+    for name, model in candidates.items():
+        if name == "Logistic V1 Baseline":
+            p_valid = model.fit(
+                baseline_train[V1_NUMERIC_FEATURES], baseline_train["Outcome"]
+            ).predict_proba(baseline_valid[V1_NUMERIC_FEATURES])[:, 1]
+            validation[name] = _metrics(baseline_valid["Outcome"], p_valid)
+        else:
+            p_valid = _fit_and_predict(model, train, valid)
+            validation[name] = _metrics(valid["Outcome"], p_valid)
 
     selected_name = max(validation, key=lambda name: _model_rank_key(validation[name]))
 

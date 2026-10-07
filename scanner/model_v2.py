@@ -44,6 +44,20 @@ CATEGORICAL_FEATURES = [
 
 ALL_FEATURES = NUMERIC_FEATURES + CATEGORICAL_FEATURES
 
+V1_NUMERIC_FEATURES = [
+    "SetupScore",
+    "RVOL20",
+    "BaseDays",
+    "BreakoutATR",
+    "ATRCompression",
+    "Trend20",
+    "Trend50",
+    "Trend200",
+    "RS_SPY_20",
+    "TR_ATR20",
+    "MarketRegimeNum",
+]
+
 
 def add_v2_features(df: pd.DataFrame) -> pd.DataFrame:
     x = df.copy()
@@ -66,6 +80,30 @@ def add_v2_features(df: pd.DataFrame) -> pd.DataFrame:
     x = x.dropna(subset=NUMERIC_FEATURES + ["Outcome", "SignalDate"])
     x["Outcome"] = x["Outcome"].astype(int)
     return x.sort_values("SignalDate").reset_index(drop=True)
+
+
+def _prepare_v1(df: pd.DataFrame) -> pd.DataFrame:
+    x = df.copy()
+    x["MarketRegimeNum"] = x["MarketRegime"].astype(str).map(
+        lambda v: 1.0 if v.startswith("Bullish") else (-1.0 if v.startswith("Bearish") else 0.0)
+    )
+    x["SignalDate"] = pd.to_datetime(x["SignalDate"], errors="coerce")
+    x = x.replace([np.inf, -np.inf], np.nan).dropna(
+        subset=V1_NUMERIC_FEATURES + ["Outcome", "SignalDate"]
+    )
+    return x.sort_values("SignalDate").reset_index(drop=True)
+
+
+def build_logistic_v1_baseline() -> CalibratedClassifierCV:
+    base = Pipeline([
+        ("scale", StandardScaler()),
+        ("clf", LogisticRegression(max_iter=3000, class_weight="balanced")),
+    ])
+    return CalibratedClassifierCV(
+        base,
+        method="isotonic",
+        cv=TimeSeriesSplit(n_splits=5),
+    )
 
 
 def _preprocessor() -> ColumnTransformer:
@@ -203,17 +241,30 @@ def _model_rank_key(metrics: dict[str, Any]) -> tuple[float, float, float]:
 
 def train_and_validate_v2(df: pd.DataFrame, direction: str) -> tuple[Any, dict[str, Any]]:
     clean = add_v2_features(df)
+    clean_v1 = _prepare_v1(df)
     train, valid, holdout = _date_split(clean)
 
     candidates = {
+        "Logistic V1 Baseline": build_logistic_v1_baseline(),
         "Logistic V2": build_logistic_v2(),
         "HistGradientBoosting V2": build_hist_gradient_boosting(),
     }
 
     validation = {}
-    for name, model in candidates.items():
-        p_valid = _fit_and_predict(model, train, valid)
-        validation[name] = _metrics(valid["Outcome"], p_valid)
+
+    baseline_train, baseline_valid, baseline_holdout = _date_split(clean_v1)
+    v1_split_matches = (
+        baseline_valid["SignalDate"].min() == valid["SignalDate"].min()
+        and baseline_holdout["SignalDate"].min() == holdout["SignalDate"].min()
+    )
+    if not v1_split_matches:
+        raise ValueError("V1 baseline and V2 sample do not share the same chronological boundaries.")
+
+    v1_model = candidates["Logistic V1 Baseline"]
+    p_valid = v1_model.fit(
+        baseline_train[V1_NUMERIC_FEATURES], baseline_train["Outcome"]
+    ).predict_proba(baseline_valid[V1_NUMERIC_FEATURES])[:, 1]
+    validation["Logistic V1 Baseline"] = _metrics(baseline_valid["Outcome"], p_valid)
 
     selected_name = max(validation, key=lambda name: _model_rank_key(validation[name]))
 
@@ -221,7 +272,13 @@ def train_and_validate_v2(df: pd.DataFrame, direction: str) -> tuple[Any, dict[s
     # untouched chronological holdout. The holdout is never used for selection.
     dev = pd.concat([train, valid], ignore_index=True)
     selected_model = candidates[selected_name]
-    p_holdout = _fit_and_predict(selected_model, dev, holdout)
+
+    if selected_name == "Logistic V1 Baseline":
+        dev_v1 = pd.concat([baseline_train, baseline_valid], ignore_index=True)
+        selected_model.fit(dev_v1[V1_NUMERIC_FEATURES], dev_v1["Outcome"])
+        p_holdout = selected_model.predict_proba(baseline_holdout[V1_NUMERIC_FEATURES])[:, 1]
+    else:
+        p_holdout = _fit_and_predict(selected_model, dev, holdout)
     holdout_metrics = _metrics(holdout["Outcome"], p_holdout)
     calibration = _calibration_table(holdout["Outcome"], p_holdout)
 
@@ -245,7 +302,8 @@ def train_and_validate_v2(df: pd.DataFrame, direction: str) -> tuple[Any, dict[s
             "n_holdout": int(len(holdout)),
         },
         "holdout": holdout_metrics,
-        "features": ALL_FEATURES,
+        "features": V1_NUMERIC_FEATURES if selected_name == "Logistic V1 Baseline" else ALL_FEATURES,
+        "selection_rule": "Choose on chronological validation only using top-10 expectancy, then top-20 expectancy, then lower Brier; evaluate once on untouched holdout.",
     }
 
     return selected_model, {

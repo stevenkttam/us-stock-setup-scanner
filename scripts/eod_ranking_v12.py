@@ -68,6 +68,12 @@ def panel(price_map,spy):
   if i%100==0:print("FEATURE",i,flush=True)
  if not a:raise RuntimeError("No feature data")
  p=pd.concat(a,ignore_index=True); p=p[p.Close.ge(MIN_PRICE)&p.DollarVolume20.ge(MIN_DV)].copy()
+ p=p.sort_values(["Ticker","SignalDate"]).reset_index(drop=True)
+ sp=pd.to_numeric(spy["Close"],errors="coerce").sort_index()
+ for h in H:
+  p[f"Ret{h}"]=p.groupby("Ticker",observed=True)["Close"].pct_change(h,fill_method=None)
+  sr=sp.pct_change(h,fill_method=None)
+  p[f"Excess{h}"]=p[f"Ret{h}"]-pd.to_datetime(p["SignalDate"]).map(sr)
  q=p.dropna(subset=["ForwardExcess5"]).groupby("SignalDate")["ForwardExcess5"].rank(pct=True,method="average")
  p["LongLabel"]=np.nan;p["ShortLabel"]=np.nan;p.loc[q.index,"LongLabel"]=(q>=.8).astype(int);p.loc[q.index,"ShortLabel"]=(q<=.2).astype(int)
  return p.sort_values(["SignalDate","Ticker"]).reset_index(drop=True)

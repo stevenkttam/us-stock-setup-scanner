@@ -184,7 +184,7 @@ def trigger_trade(x5: pd.DataFrame, signal_date: pd.Timestamp, direction: str, r
     trade_day = (signal_date + pd.Timedelta(days=1)).date()
     # Signal date can be Friday/holiday; find the first available later session.
     sessions = sorted(pd.to_datetime(x5["SessionDate"].drop_duplicates()).tolist())
-    future_sessions = [d for d in sessions if d > signal_date.date()]
+    future_sessions = [d for d in sessions if d.date() > signal_date.date()]
     if not future_sessions:
         return None
     trade_day = future_sessions[0]

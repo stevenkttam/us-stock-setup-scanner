@@ -486,7 +486,20 @@ def main() -> None:
             signals[c] = np.nan
     if sector_rows:
         sector_ctx = pd.concat(sector_rows, ignore_index=True)
-        signals = signals.merge(sector_ctx, on=["Ticker", "SignalDate"], how="left", suffixes=("", "_sector"))
+        signals = signals.merge(
+            sector_ctx,
+            on=["Ticker", "SignalDate"],
+            how="left",
+            suffixes=("", "_sector"),
+        )
+        # The base signal frame already contains placeholder sector columns.
+        # Coalesce the enriched values into the canonical feature names rather
+        # than leaving the originals as all-NaN after the merge.
+        for c in ["SectorProxy", "SectorProxyCorr60", "SectorReturn20", "RS_Sector_20", "SectorStrengthRankPct"]:
+            suffixed = f"{c}_sector"
+            if suffixed in signals.columns:
+                signals[c] = signals[c].combine_first(signals[suffixed])
+                signals = signals.drop(columns=[suffixed])
 
     data = add_outcomes(signals, {k: prices[k] for k in feature_map})
     if data.empty:

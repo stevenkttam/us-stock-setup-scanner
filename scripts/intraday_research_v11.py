@@ -159,9 +159,8 @@ def prepare_5m(d: pd.DataFrame) -> pd.DataFrame:
     # for the same 5-minute slot, using only prior sessions.
     x = x.sort_index()
     x["TODBaseVol"] = (
-        x.groupby("MinuteOfDay", group_keys=False)["Volume"]
-        .apply(lambda s: s.shift(1).rolling(20, min_periods=5).mean())
-        .reset_index(level=0, drop=True)
+        x.groupby("MinuteOfDay")["Volume"]
+        .transform(lambda s: s.shift(1).rolling(20, min_periods=5).mean())
     )
     x["TODRVOL"] = x["Volume"] / x["TODBaseVol"].replace(0, np.nan)
     return x

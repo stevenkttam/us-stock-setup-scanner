@@ -183,7 +183,7 @@ def session_bars(x5: pd.DataFrame, date) -> pd.DataFrame:
 def trigger_trade(x5: pd.DataFrame, signal_date: pd.Timestamp, direction: str, rule_name: str) -> dict | None:
     trade_day = (signal_date + pd.Timedelta(days=1)).date()
     # Signal date can be Friday/holiday; find the first available later session.
-    sessions = sorted(pd.to_datetime(x5["SessionDate"].drop_duplicates()).date)
+    sessions = sorted(pd.to_datetime(x5["SessionDate"].drop_duplicates()).tolist())
     future_sessions = [d for d in sessions if d > signal_date.date()]
     if not future_sessions:
         return None

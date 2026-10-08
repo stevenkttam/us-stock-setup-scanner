@@ -1,0 +1,42 @@
+name: V3 Intraday Confirmation Research - Fresh 500 Stocks / 60 Days
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/intraday_research_v11.py"
+      - ".github/workflows/intraday_research_v11.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    env:
+      PYTHONPATH: .
+      PYTHONUNBUFFERED: "1"
+      SCANNER_MAX_SYMBOLS: "500"
+      SCANNER_BATCH_SIZE: "25"
+      DAILY_PERIOD: "2y"
+      INTRADAY_PERIOD: "60d"
+      INTRADAY_RESEARCH_DAYS: "60"
+      MAX_ENTRY_MINUTE: "180"
+      CONFIRM_15M_BARS: "2"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run V3 intraday confirmation research
+        run: python scripts/intraday_research_v11.py
+      - name: Upload V3 research results
+        uses: actions/upload-artifact@v7
+        with:
+          name: intraday-v11-fresh-500-60d
+          path: artifacts/intraday_v11/
+          retention-days: 14

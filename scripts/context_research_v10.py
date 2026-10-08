@@ -494,7 +494,7 @@ def main() -> None:
     data["DollarVolume20Log"] = np.log1p(pd.to_numeric(data["DollarVolume20"], errors="coerce").clip(lower=0))
     data = data.replace([np.inf, -np.inf], np.nan)
 
-    required = ENRICHED_NUMERIC + ENRICHED_CATEGORICAL + ["Outcome", "SignalDate"]
+    required = ENRICHED_NUMERIC + BASE_CATEGORICAL + ["Outcome", "SignalDate"]
     clean = data.dropna(subset=required).copy()
     clean["Outcome"] = clean["Outcome"].astype(int)
     if clean.empty:

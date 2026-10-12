@@ -33,19 +33,19 @@ jobs:
       - name: Publish summary to workflow run
         run: |
           python - <<'PY'
-          import json, pathlib, pandas as pd
+          import json, pathlib, pandas as pd, os
           root=pathlib.Path("artifacts/eod_replication_v13")
           s=json.loads((root/"summary.json").read_text())
           ci=pd.read_csv(root/"primary_holdout_confidence_intervals.csv")
-          with open("$GITHUB_STEP_SUMMARY","a") as f:
-              f.write("# V13 Frozen EOD Replication\n\n")
+          with open(os.environ["GITHUB_STEP_SUMMARY"],"a") as f:
+              f.write("# V13 EOD Model-vs-Momentum Replication\n\n")
               f.write(f"- Fresh symbols requested/downloaded: {s['symbols_requested']} / {s['symbols_downloaded']}\n")
               f.write(f"- Eligible tickers / dates: {s['eligible_tickers']} / {s['unique_dates']}\n")
-              f.write("- Primary strategy frozen from V12 validation: Long = 20-day relative momentum; Short = model ranking. Top 40 / 5 days.\n\n")
-              f.write("| Direction | Frozen ranking | Dates | Mean daily excess | 95% block-bootstrap CI | Model minus momentum | Difference CI | Edge supported? |\n")
-              f.write("|---|---|---:|---:|---:|---:|---:|---|\n")
+              f.write("- No ranking winner selected on this experiment's validation or holdout. Top 40 / 5 days is the primary test.\n\n")
+              f.write("| Direction | Ranking | Dates | Mean daily excess | 95% block-bootstrap CI | Positive excess supported? | Model-minus-momentum difference | Difference CI | Model beats momentum reliably? |\n")
+              f.write("|---|---|---:|---:|---:|---|---:|---:|---|\n")
               for _,r in ci.iterrows():
-                  f.write(f"| {r.Direction} | {r.FrozenRanking} | {int(r.Dates)} | {r.MeanDailyExcess:.2%} | [{r.ExcessCI95Low:.2%}, {r.ExcessCI95High:.2%}] | {r.ModelMinusMomentumMean:.2%} | [{r.DiffCI95Low:.2%}, {r.DiffCI95High:.2%}] | {'Yes' if r.PrimaryEdgeSupported else 'No'} |\n")
+                  f.write(f"| {r.Direction} | {r.Ranking} | {int(r.Dates)} | {r.MeanDailyExcess:.2%} | [{r.ExcessCI95Low:.2%}, {r.ExcessCI95High:.2%}] | {'Yes' if r.PositiveExcessSupported else 'No'} | {r.ModelMinusMomentumMean:.2%} | [{r.DiffCI95Low:.2%}, {r.DiffCI95High:.2%}] | {'Yes' if r.ModelBeatsMomentumReliably else 'No'} |\n")
               f.write("\nNo probability calibration or production approval is granted by this research run.\n")
           PY
       - name: Upload compact V13 results

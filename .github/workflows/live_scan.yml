@@ -2,6 +2,14 @@ name: Live Daily Scan
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/run_live_scan.py"
+      - "scanner/**"
+      - "app.py"
+      - ".github/workflows/live_scan.yml"
   schedule:
     - cron: "30 21 * * 1-5"
 
@@ -22,12 +30,12 @@ jobs:
           python-version: "3.11"
       - name: Install dependencies
         run: pip install -r requirements.txt
-      - name: Run validated daily scanner
+      - name: Run research-only daily ranking
         run: python scripts/run_live_scan.py
       - name: Commit latest scan and status
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/latest_scan.parquet artifacts/live_scan_status.json
-          git diff --cached --quiet || git commit -m "Refresh daily scanner results"
+          git diff --cached --quiet || git commit -m "Refresh daily research-only scan"
           git push

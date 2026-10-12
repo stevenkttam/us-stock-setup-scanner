@@ -139,7 +139,7 @@ def blank_outcome_fields() -> dict:
     return fields
 
 
-def add_new_signal_rows(current: pd.DataFrame, ledger: pd.DataFrame, symbol_map: dict[str, str], spy_calendar: pd.DatetimeIndex, allow_new: bool):
+def add_new_signal_rows(current: pd.DataFrame, ledger: pd.DataFrame, symbol_map: dict[str, str], spy_calendar: pd.DatetimeIndex, allow_new: bool, expected_signal_date: str = ""):
     if not allow_new:
         print("This run is for outcome updates/validation only; new signals will not be seeded.", flush=True)
         return ledger, 0, "new signal insertion disabled for this event"
@@ -157,6 +157,8 @@ def add_new_signal_rows(current: pd.DataFrame, ledger: pd.DataFrame, symbol_map:
         return ledger, 0, f"refusing stale/unmatched snapshot: {date_text(signal_date)} is not in the SPY calendar"
     if date_text(signal_date) != date_text(spy_calendar[-1]):
         return ledger, 0, f"refusing stale snapshot: signal date {date_text(signal_date)} does not match latest market date {date_text(spy_calendar[-1])}"
+    if expected_signal_date and date_text(signal_date) != date_text(expected_signal_date):
+        return ledger, 0, f"refusing stale/non-session snapshot: signal date {date_text(signal_date)} does not match scheduled run date {date_text(expected_signal_date)}"
 
     current["SetupScore"] = pd.to_numeric(current["SetupScore"], errors="coerce")
     current["SignalRank"] = current.groupby("Direction")["SetupScore"].rank(method="first", ascending=False).astype("Int64")
@@ -455,6 +457,7 @@ def main():
     symbol_map = load_universe_mapping(data_dir / "universe.csv")
     # Only download stocks with incomplete outcomes plus today's candidates if the event allows a new signal.
     allow_new = os.getenv("SHADOW_ADD_NEW_SIGNALS", "false").lower() == "true"
+    expected_signal_date = os.getenv("SHADOW_EXPECTED_SIGNAL_DATE", "").strip()
     required_tickers = set()
     if not ledger.empty:
         pending_mask = ledger[OUTCOME_STATUS_COLUMNS].astype(str).apply(lambda col: col.ne("complete"), axis=0).any(axis=1)
@@ -469,7 +472,7 @@ def main():
     price_map = download_daily(sorted(required_tickers), period="1y", batch_size=50, sleep_seconds=0.5) if required_tickers else {}
     print(f"Shadow tracker downloaded {len(price_map)} / {len(required_tickers)} required stocks.", flush=True)
 
-    ledger, added, seed_note = add_new_signal_rows(current, ledger, symbol_map, calendar, allow_new)
+    ledger, added, seed_note = add_new_signal_rows(current, ledger, symbol_map, calendar, allow_new, expected_signal_date)
     if not ledger.empty:
         # Make CSV-created booleans robust and default old rows safely.
         for col in ("QCFlagged", "QCUnusualVolume", "QCCountertrend"):

@@ -38,11 +38,12 @@ def fresh(s,n=1000):
  return sample([z for z in s if z not in u],n)
 
 def build(px,spy,t):
- f=add_features(px,spy=spy).copy().sort_index(); c=pd.to_numeric(f.Close,errors="coerce"); v=pd.to_numeric(f.Volume,errors="coerce")
- sp=pd.to_numeric(spy.Close,errors="coerce").sort_index()
+ f=add_features(px,spy=spy).copy().sort_index(); c=pd.to_numeric(f.Close,errors="coerce"); op=pd.to_numeric(f.Open,errors="coerce"); v=pd.to_numeric(f.Volume,errors="coerce")
+ sp=pd.to_numeric(spy.Close,errors="coerce").sort_index(); spo=pd.to_numeric(spy.Open,errors="coerce").sort_index()
  sr={h:sp.pct_change(h,fill_method=None).reindex(f.index) for h in H}
- # Outcome benchmark must use SPY's same forward holding window, not trailing SPY returns.
- sf={h:(sp.shift(-h)/sp-1).reindex(f.index) for h in H}
+ # Tradable outcome: enter at next-session open, exit at the close h sessions after signal.
+ # Match the SPY benchmark to that exact same open-to-close interval.
+ sf={h:(sp.shift(-h)/spo.shift(-1)-1).reindex(f.index) for h in H}
  for h in H:
   f[f"Ret{h}"]=c.pct_change(h,fill_method=None); f[f"Excess{h}"]=f[f"Ret{h}"]-sr[h]
  # Longer-lookback return features used by the model (not forward-label horizons).
@@ -64,7 +65,7 @@ def build(px,spy,t):
  f["GapPct"]=pd.to_numeric(f.Open,errors="coerce")/c.shift(1)-1; f["IntradayReturn"]=c/pd.to_numeric(f.Open,errors="coerce")-1
  f["TrueRangePct"]=f.TR/c; f["Ticker"]=t; f["SignalDate"]=pd.to_datetime(f.index)
  for h in H:
-  f[f"ForwardRet{h}"]=c.shift(-h)/c-1; f[f"ForwardExcess{h}"]=f[f"ForwardRet{h}"]-sf[h]
+  f[f"ForwardRet{h}"]=c.shift(-h)/op.shift(-1)-1; f[f"ForwardExcess{h}"]=f[f"ForwardRet{h}"]-sf[h]
  return f.replace([np.inf,-np.inf],np.nan)
 
 def panel(price_map,spy):

@@ -7,6 +7,7 @@ on:
     paths:
       - "scripts/update_shadow_test_v16.py"
       - "tests/test_shadow_tracker_v16.py"
+      - "app.py"
       - ".github/workflows/shadow_test_v16.yml"
   workflow_run:
     workflows: ["Live Daily Scan"]
@@ -28,8 +29,8 @@ jobs:
           python-version: "3.11"
       - name: Install dependencies
         run: pip install -r requirements.txt
-      - name: Compile shadow tracker
-        run: python -m py_compile scripts/update_shadow_test_v16.py
+      - name: Compile shadow tracker and Streamlit dashboard
+        run: python -m py_compile scripts/update_shadow_test_v16.py app.py
       - name: Test dates, matched returns, costs, and QC labels
         run: python tests/test_shadow_tracker_v16.py
 

@@ -1,0 +1,81 @@
+name: Research V15 Point-in-Time QC Group Validation
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/eod_qc_validation_v15.py"
+      - ".github/workflows/eod_qc_validation_v15.yml"
+      - "scanner/scan.py"
+      - "scanner/features.py"
+      - "scanner/data.py"
+      - "config.yaml"
+
+permissions:
+  contents: read
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    env:
+      PYTHONPATH: .
+      PYTHONUNBUFFERED: "1"
+      SCANNER_MAX_SYMBOLS: "1000"
+      SCANNER_BATCH_SIZE: "50"
+      SCANNER_PERIOD: "10y"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Compile V15 research script
+        run: python -m py_compile scripts/eod_qc_validation_v15.py
+      - name: Run point-in-time QC group validation
+        run: python scripts/eod_qc_validation_v15.py
+      - name: Publish V15 results to workflow summary
+        run: |
+          python - <<'PY'
+          import json, os, pathlib, pandas as pd
+          root = pathlib.Path("artifacts/eod_qc_validation_v15")
+          s = json.loads((root / "summary.json").read_text())
+          perf = pd.read_csv(root / "qc_group_performance_summary.csv")
+          comp = pd.read_csv(root / "qc_incremental_holdout_comparisons.csv")
+          primary = perf[
+              (perf.Partition == "Holdout") &
+              (perf.TopK == 10) &
+              (perf.Horizon == 5) &
+              (perf.CostScenario == "Base")
+          ].copy()
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as f:
+              f.write("# V15 Point-in-Time QC Group Validation\n\n")
+              f.write(f"- Historical ticker sample: {s['symbols_downloaded']} / {s['symbols_requested']} downloaded\n")
+              f.write(f"- Candidate events / unique tickers / dates: {s['candidate_events']:,} / {s['candidate_tickers']:,} / {s['candidate_dates']:,}\n")
+              f.write(f"- Long / Short candidate events: {s['long_events']:,} / {s['short_events']:,}\n")
+              f.write(f"- QC flagged / clear events: {s['qc_flagged_events']:,} / {s['qc_clear_events']:,}\n")
+              f.write(f"- Chronological holdout begins: {s['split']['holdout_cut']}\n")
+              f.write("- Main comparison: Long and Short analyzed separately; Top 10 by heuristic score; next-session open entry; five-session exit.\n")
+              f.write("- Base costs: 10 bps round-trip; Short borrow assumption 3% annualized. Stress: 25 bps round-trip; Short borrow assumption 10% annualized.\n\n")
+              f.write("## Holdout Top 10 / 5-session performance — base cost\n\n")
+              f.write("| Direction | QC group | Active dates | Selected trades | Mean daily gross PnL | Mean daily net PnL | 95% block-bootstrap CI for net PnL | Net hit rate |\n")
+              f.write("|---|---|---:|---:|---:|---:|---:|---:|\n")
+              for _, r in primary.iterrows():
+                  f.write(f"| {r.Direction} | {r.QCGroup} | {int(r.ActiveDates)} | {int(r.TotalSelectedTrades)} | {r.MeanDailyGrossDirectionalPnL:.3%} | {r.MeanDailyNetPnL:.3%} | [{r.NetCI95Low:.3%}, {r.NetCI95High:.3%}] | {r.NetHitRate:.1%} |\n")
+              f.write("\n## Does filtering improve net results versus all candidates?\n\n")
+              f.write("| Direction | Cost case | Comparison | Paired active dates | Coverage of all dates | Mean daily net difference | 95% CI | Improvement supported? |\n")
+              f.write("|---|---|---|---:|---:|---:|---:|---|\n")
+              for _, r in comp.iterrows():
+                  f.write(f"| {r.Direction} | {r.CostScenario} | {r.Comparison} | {int(r.PairedActiveDates)} | {r.CoverageOfAllDates:.1%} | {r.MeanDailyNetPnLDifference:.3%} | [{r.DiffCI95Low:.3%}, {r.DiffCI95High:.3%}] | {'Yes' if r.ImprovementSupported else 'No'} |\n")
+              f.write("\n## Limitations\n\n")
+              f.write("This is exploratory historical research, not production validation. QC flags were not optimized on the outcome data, but they were defined after reviewing recent live candidates. Current-universe survivorship bias remains. Cost and borrow inputs are assumptions rather than broker-specific quotes; actual fills, short availability, borrow recalls, spread, market impact and taxes are not modeled. A QC filter should not be used for trading unless the net holdout effect is economically meaningful, sufficiently covered, and independently replicated.\n")
+          PY
+      - name: Upload V15 QC validation artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: eod-qc-validation-v15-point-in-time-10y
+          path: artifacts/eod_qc_validation_v15/
+          retention-days: 30

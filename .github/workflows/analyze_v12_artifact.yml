@@ -1,0 +1,42 @@
+name: Analyze Completed V12 EOD Ranking Artifact
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/summarize_v12_artifact.py"
+      - ".github/workflows/analyze_v12_artifact.yml"
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+      - name: Download completed V12 research artifact
+        run: gh run download 38208663190 --repo "$GITHUB_REPOSITORY" --name eod-ranking-v12-fresh-1000-10y --dir v12-artifact
+      - name: Install analysis dependencies
+        run: pip install "pandas>=2.2,<3" "numpy>=1.26,<3" "pyarrow>=25,<26"
+      - name: Analyze holdout and write report
+        run: python scripts/summarize_v12_artifact.py v12-artifact
+      - name: Publish analysis report in workflow summary
+        run: cat v12-analysis-report.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload compact V12 analysis report
+        uses: actions/upload-artifact@v7
+        with:
+          name: eod-ranking-v12-analysis-report
+          path: |
+            v12-analysis-report.md
+            v12-analysis-metrics.json
+          retention-days: 30

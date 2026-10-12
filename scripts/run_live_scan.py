@@ -75,6 +75,81 @@ def download_spy_with_retry(period: str = "1y", attempts: int = 4) -> pd.DataFra
     )
 
 
+
+def add_quality_control_flags(candidates: pd.DataFrame) -> pd.DataFrame:
+    """Add transparent review flags without changing the heuristic ranking."""
+    out = candidates.copy()
+    flag_list = []
+    statuses = []
+    contexts = []
+
+    def number(row, key):
+        try:
+            value = float(row.get(key))
+            return value if pd.notna(value) else float("nan")
+        except (TypeError, ValueError):
+            return float("nan")
+
+    for _, row in out.iterrows():
+        flags = []
+        rvol = number(row, "RVOL20")
+        acceleration = number(row, "VolumeAcceleration")
+        trigger_atr = number(row, "BreakoutATR")
+        atr_pct = number(row, "ATR20Pct")
+        risk_atr = number(row, "RiskATR")
+        direction = str(row.get("Direction", ""))
+        regime_text = str(row.get("MarketRegime", ""))
+
+        # These are warnings for review, not automatic trade-rejection rules.
+        if pd.notna(acceleration) and acceleration >= 10:
+            flags.append("EXTREME VOLUME ACCELERATION (>=10x prior day)")
+        elif pd.notna(acceleration) and acceleration >= 5:
+            flags.append("HIGH VOLUME ACCELERATION (>=5x prior day)")
+        if pd.notna(rvol) and rvol >= 10:
+            flags.append("EXTREME RVOL (>=10x 20-day average)")
+        if pd.notna(trigger_atr) and trigger_atr >= 4:
+            flags.append("EXTENDED TRIGGER (>=4 ATR)")
+        if pd.notna(atr_pct) and atr_pct >= 0.08:
+            flags.append("HIGH VOLATILITY (ATR20 >=8% of price)")
+        if pd.notna(risk_atr) and risk_atr < 0.5:
+            flags.append("TIGHT REFERENCE STOP (<0.5 ATR)")
+
+        countertrend = (
+            (regime_text.startswith("Bullish") and direction == "Short")
+            or (regime_text.startswith("Bearish") and direction == "Long")
+        )
+        if countertrend:
+            flags.append("COUNTERTREND VS SPY REGIME")
+
+        severe_data_warning = (
+            (pd.notna(acceleration) and acceleration >= 10)
+            or (pd.notna(rvol) and rvol >= 10)
+        )
+        risk_warning = (
+            (pd.notna(trigger_atr) and trigger_atr >= 4)
+            or (pd.notna(atr_pct) and atr_pct >= 0.08)
+            or (pd.notna(risk_atr) and risk_atr < 0.5)
+        )
+
+        if severe_data_warning:
+            status = "CHECK — unusual volume; verify raw data"
+        elif risk_warning:
+            status = "CHECK — extension / volatility / stop distance"
+        elif countertrend:
+            status = "COUNTERTREND — verify market context"
+        else:
+            status = "STANDARD REVIEW — still research only"
+
+        flag_list.append("; ".join(flags) if flags else "No automatic QC flags")
+        statuses.append(status)
+        contexts.append("Countertrend vs SPY" if countertrend else "Aligned / neutral vs SPY")
+
+    out["QualityStatus"] = statuses
+    out["QualityFlags"] = flag_list
+    out["MarketContext"] = contexts
+    return out
+
+
 def main():
     cfg = load_config()
     data_dir = ROOT / "data"
@@ -138,6 +213,7 @@ def main():
     candidates["SignalDate"] = pd.Timestamp(spy.index[-1]).date().isoformat()
     candidates["UniverseSize"] = len(universe)
     candidates["MarketRegime"] = regime
+    candidates = add_quality_control_flags(candidates)
     candidates = candidates.sort_values(
         ["Direction", "SetupScore"], ascending=[True, False], kind="mergesort"
     ).reset_index(drop=True)
@@ -158,7 +234,11 @@ def main():
         "candidates": int(len(candidates)),
         "longs": int((candidates["Direction"] == "Long").sum()),
         "shorts": int((candidates["Direction"] == "Short").sum()),
+        "qc_flagged_candidates": int((candidates["QualityFlags"] != "No automatic QC flags").sum()),
+        "qc_unusual_volume_candidates": int(candidates["QualityStatus"].str.startswith("CHECK — unusual volume").sum()),
+        "qc_countertrend_candidates": int(candidates["MarketContext"].eq("Countertrend vs SPY").sum()),
         "regime": regime,
+        "qc_note": "QC flags are review prompts only. They do not change the heuristic score or certify trade quality.",
         "execution_note": "SignalClose and stop/target are reference levels from the signal-date close. The planned entry is next-session open; recalculate levels after any opening gap.",
     }
     (artifacts / "live_scan_status.json").write_text(json.dumps(status, indent=2), encoding="utf-8")

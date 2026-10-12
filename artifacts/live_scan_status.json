@@ -1,0 +1,16 @@
+{
+  "status": "success",
+  "research_only": true,
+  "production_ready": false,
+  "probabilities_enabled": false,
+  "ranking_method": "heuristic setup score; not a validated probability",
+  "signal_date": "2026-10-09",
+  "universe_size": 5359,
+  "symbols_requested": 5359,
+  "symbols_downloaded": 5358,
+  "candidates": 117,
+  "longs": 62,
+  "shorts": 55,
+  "regime": "Bullish",
+  "execution_note": "SignalClose and stop/target are reference levels from the signal-date close. The planned entry is next-session open; recalculate levels after any opening gap."
+}

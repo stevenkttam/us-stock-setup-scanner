@@ -8,7 +8,6 @@ on:
     paths:
       - "scripts/run_live_scan.py"
       - "scanner/**"
-      - "app.py"
       - ".github/workflows/live_scan.yml"
   schedule:
     - cron: "30 21 * * 1-5"

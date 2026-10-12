@@ -97,19 +97,10 @@ def build_panel(prices,spy):
         except Exception as e: print(f"FEATURE SKIP {ticker}: {e}",flush=True)
         if i%100==0: print(f"FEATURE BUILT {i}",flush=True)
     if not frames: raise RuntimeError("No feature frames built")
+    # Each ticker's rolling and forward-return fields were computed from its complete daily history.
+    # Apply price/liquidity eligibility only after those calculations; do not shift returns on the filtered panel.
     p=pd.concat(frames,ignore_index=True)
     p=p[p["Close"].ge(MIN_PRICE)&p["DollarVolume20"].ge(MIN_DV)].copy()
-    p=p.sort_values(["Ticker","SignalDate"]).reset_index(drop=True)
-    # Recalculate historical returns after panel assembly, preserving identical feature definitions across symbols.
-    spy_close=pd.to_numeric(spy["Close"],errors="coerce").sort_index()
-    for h in HORIZONS:
-        p[f"Ret{h}"]=p.groupby("Ticker",observed=True)["Close"].pct_change(h,fill_method=None)
-        p[f"ForwardRet{h}"]=p.groupby("Ticker",observed=True)["Close"].shift(-h)/p["Close"]-1
-        p[f"ForwardExcess{h}"]=p[f"ForwardRet{h}"]-pd.to_datetime(p["SignalDate"]).map(spy_close.pct_change(h,fill_method=None))
-    for h in (20,60,120,252):
-        p[f"Ret{h}"]=p.groupby("Ticker",observed=True)["Close"].pct_change(h,fill_method=None)
-    for h in (20,60):
-        p[f"Excess{h}"]=p[f"Ret{h}"]-pd.to_datetime(p["SignalDate"]).map(spy_close.pct_change(h,fill_method=None))
     rank=p.dropna(subset=["ForwardExcess5"]).groupby("SignalDate",observed=True)["ForwardExcess5"].rank(pct=True,method="average")
     p["LongLabel"]=np.nan;p["ShortLabel"]=np.nan
     p.loc[rank.index,"LongLabel"]=(rank>=.80).astype(float)

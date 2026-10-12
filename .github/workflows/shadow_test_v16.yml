@@ -31,6 +31,26 @@ jobs:
         run: pip install -r requirements.txt
       - name: Compile shadow tracker and Streamlit dashboard
         run: python -m py_compile scripts/update_shadow_test_v16.py app.py
+      - name: Smoke test Streamlit dashboard startup
+        run: |
+          streamlit run app.py --server.headless true --server.port 8501 --browser.gatherUsageStats false > /tmp/streamlit.log 2>&1 &
+          STREAMLIT_PID=$!
+          for attempt in $(seq 1 30); do
+            if curl --silent --show-error --fail http://127.0.0.1:8501/_stcore/health >/dev/null; then
+              kill "$STREAMLIT_PID" || true
+              wait "$STREAMLIT_PID" 2>/dev/null || true
+              echo "Streamlit startup smoke test passed."
+              exit 0
+            fi
+            if ! kill -0 "$STREAMLIT_PID" 2>/dev/null; then
+              cat /tmp/streamlit.log
+              exit 1
+            fi
+            sleep 1
+          done
+          cat /tmp/streamlit.log
+          kill "$STREAMLIT_PID" || true
+          exit 1
       - name: Test dates, matched returns, costs, and QC labels
         run: python tests/test_shadow_tracker_v16.py
 

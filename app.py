@@ -18,6 +18,7 @@ with st.sidebar:
     st.write("Daily signal → next-session open entry → 10-session research horizon")
     st.info("Research only: calibrated probabilities and A/B/C trade tiers are disabled.")
 
+data = pd.DataFrame()
 if mode == "Sample dashboard":
     longs, shorts = sample_rankings()
     regime = "Illustrative"
@@ -50,6 +51,18 @@ m2.metric("Universe", universe)
 m3.metric("Long Candidates", len(longs))
 m4.metric("Short Candidates", len(shorts))
 st.caption(f"Signal date: **{date}** · {source}")
+if mode == "Live data" and not data.empty:
+    flagged = int((data.get("QualityFlags", pd.Series("No automatic QC flags", index=data.index)) != "No automatic QC flags").sum())
+    unusual_volume = int(data.get("QualityStatus", pd.Series("", index=data.index)).astype(str).str.startswith("CHECK — unusual volume").sum())
+    countertrend = int(data.get("MarketContext", pd.Series("", index=data.index)).eq("Countertrend vs SPY").sum())
+    q1, q2, q3 = st.columns(3)
+    q1.metric("QC-flagged candidates", flagged)
+    q2.metric("Unusual-volume checks", unusual_volume)
+    q3.metric("Countertrend candidates", countertrend)
+    st.warning(
+        "QC flags are review prompts, not proven rejection rules. They do not alter the heuristic score. "
+        "Every candidate remains research-only."
+    )
 
 
 def render_table(df: pd.DataFrame, direction: str, live: bool = False) -> None:
@@ -68,7 +81,8 @@ def render_table(df: pd.DataFrame, direction: str, live: bool = False) -> None:
         columns = [
             "Ticker", "SetupScore", "Setup", "RVOL20", "VolumeAcceleration",
             "BaseDays", "BreakoutATR", "ATR20Pct", "RiskATR", "SignalClose",
-            "Stop", "Target2R", "Trend", "MarketRegime", "Why",
+            "Stop", "Target2R", "Trend", "MarketRegime", "QualityStatus",
+            "QualityFlags", "MarketContext", "Why",
         ]
     else:
         columns = [
@@ -88,6 +102,9 @@ def render_table(df: pd.DataFrame, direction: str, live: bool = False) -> None:
         "SignalClose": st.column_config.NumberColumn("Signal close", format="$%.2f"),
         "Stop": st.column_config.NumberColumn("Reference stop", format="$%.2f"),
         "Target2R": st.column_config.NumberColumn("Reference 2R target", format="$%.2f"),
+        "QualityStatus": st.column_config.TextColumn("QC status", help="Research review label only; does not change score."),
+        "QualityFlags": st.column_config.TextColumn("QC warnings", help="Flags for unusual volume, extension, stop distance or countertrend context."),
+        "MarketContext": st.column_config.TextColumn("SPY context"),
     }
     st.dataframe(
         ranked[[column for column in columns if column in ranked.columns]],

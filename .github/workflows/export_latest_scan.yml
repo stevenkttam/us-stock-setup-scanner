@@ -1,0 +1,77 @@
+name: Export Latest Scan Tables
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "data/latest_scan.parquet"
+      - ".github/workflows/export_latest_scan.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+      - name: Install parquet support
+        run: pip install pandas pyarrow
+      - name: Export latest scan and Top 40 tables
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import pandas as pd
+
+          data = Path("data")
+          artifacts = Path("artifacts")
+          artifacts.mkdir(parents=True, exist_ok=True)
+          source = data / "latest_scan.parquet"
+          if not source.exists():
+              raise SystemExit("data/latest_scan.parquet is missing; nothing to export.")
+
+          df = pd.read_parquet(source)
+          if df.empty:
+              raise SystemExit("Latest scan is empty; refusing to export empty rankings.")
+
+          if "SetupScore" not in df.columns or "Direction" not in df.columns:
+              raise SystemExit("Latest scan does not contain the expected ranking fields.")
+
+          df = df.sort_values(["Direction", "SetupScore"], ascending=[True, False])
+          df.to_csv(data / "latest_scan.csv", index=False)
+
+          fields = [
+              "Ticker", "Direction", "Setup", "SetupScore", "RVOL20",
+              "VolumeAcceleration", "BaseDays", "BreakoutATR", "ATR20Pct",
+              "RiskATR", "SignalClose", "Stop", "Target2R", "Trend",
+              "MarketRegime", "SignalDate", "Why", "ResearchStatus",
+          ]
+          for direction, suffix in [("Long", "long"), ("Short", "short")]:
+              part = df[df["Direction"].eq(direction)].sort_values("SetupScore", ascending=False).head(40)
+              part[[c for c in fields if c in part.columns]].to_csv(
+                  data / f"latest_top40_{suffix}.csv", index=False
+              )
+
+          status_path = artifacts / "live_scan_status.json"
+          status = json.loads(status_path.read_text()) if status_path.exists() else {}
+          status["exported_csv_files"] = [
+              "data/latest_scan.csv",
+              "data/latest_top40_long.csv",
+              "data/latest_top40_short.csv",
+          ]
+          (artifacts / "latest_scan_summary.json").write_text(json.dumps(status, indent=2))
+          print(json.dumps(status, indent=2))
+          PY
+      - name: Commit exported CSV tables
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/latest_scan.csv data/latest_top40_long.csv data/latest_top40_short.csv artifacts/latest_scan_summary.json
+          git diff --cached --quiet || git commit -m "Export latest scan rankings to CSV"
+          git push

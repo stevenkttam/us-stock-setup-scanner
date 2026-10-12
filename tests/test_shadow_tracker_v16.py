@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 
 from scripts.update_shadow_test_v16 import (
+    add_new_signal_rows,
     calculate_outcome,
     date_text,
     horizon_dates,
@@ -71,6 +72,39 @@ class ShadowTrackerTests(unittest.TestCase):
         value = net_directional_pnl("Short", 0.05, 5, "Base")
         expected = -0.05 - 0.001 - (0.03 * 5 / 252.0)
         self.assertAlmostEqual(value, expected, places=12)
+
+    def test_stale_snapshot_is_not_seeded(self):
+        current = pd.DataFrame([{
+            "SignalDate": "2026-01-13",
+            "Ticker": "ABC",
+            "Direction": "Long",
+            "SetupScore": 80.0,
+            "SignalClose": 10.0,
+            "QualityFlags": "No automatic QC flags",
+        }])
+        ledger, added, note = add_new_signal_rows(
+            current, pd.DataFrame(), {}, self.calendar, True, "2026-01-12"
+        )
+        self.assertEqual(added, 0)
+        self.assertTrue(ledger.empty)
+        self.assertIn("scheduled run date", note)
+
+    def test_matching_scheduled_snapshot_is_seeded_once(self):
+        current = pd.DataFrame([{
+            "SignalDate": "2026-01-13",
+            "Ticker": "ABC",
+            "Direction": "Long",
+            "SetupScore": 80.0,
+            "SignalClose": 10.0,
+            "QualityFlags": "No automatic QC flags",
+        }])
+        ledger, added, note = add_new_signal_rows(
+            current, pd.DataFrame(), {}, self.calendar, True, "2026-01-13"
+        )
+        self.assertEqual(added, 1)
+        self.assertEqual(len(ledger), 1)
+        self.assertEqual(ledger.iloc[0]["YahooSymbol"], "ABC")
+        self.assertEqual(ledger.iloc[0]["SignalRank"], 1)
 
     def test_qc_flags_are_preserved_as_group_labels(self):
         result = quality_flags({

@@ -1,12 +1,10 @@
-name: Analyze Completed V12 EOD Ranking Artifact
+name: Analyze V12 EOD Artifact Automatically
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "scripts/summarize_v12_artifact.py"
-      - ".github/workflows/analyze_v12_artifact.yml"
-  workflow_dispatch:
+  workflow_run:
+    workflows:
+      - Research V12 EOD Cross-Sectional Ranking - Fresh 1000 Stocks / 10 Years
+    types: [completed]
 
 permissions:
   actions: read
@@ -14,18 +12,20 @@ permissions:
 
 jobs:
   analyze:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       PYTHONUNBUFFERED: "1"
+      RUN_ID: ${{ github.event.workflow_run.id }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
         with:
           python-version: "3.11"
-      - name: Download completed V12 research artifact
-        run: gh run download 38208663190 --repo "$GITHUB_REPOSITORY" --name eod-ranking-v12-fresh-1000-10y --dir v12-artifact
+      - name: Download the completed V12 artifact for this run
+        run: gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" --name eod-ranking-v12-fresh-1000-10y --dir v12-artifact
       - name: Install analysis dependencies
         run: pip install "pandas>=2.2,<3" "numpy>=1.26,<3" "pyarrow>=25,<26"
       - name: Analyze holdout and write report

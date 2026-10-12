@@ -1,0 +1,75 @@
+name: V16 Prospective QC Shadow Test
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/update_shadow_test_v16.py"
+      - "tests/test_shadow_tracker_v16.py"
+      - ".github/workflows/shadow_test_v16.yml"
+  workflow_run:
+    workflows: ["Live Daily Scan"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Compile shadow tracker
+        run: python -m py_compile scripts/update_shadow_test_v16.py
+      - name: Test dates, matched returns, costs, and QC labels
+        run: python tests/test_shadow_tracker_v16.py
+
+  track:
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      PYTHONPATH: .
+      PYTHONUNBUFFERED: "1"
+      SHADOW_ADD_NEW_SIGNALS: \${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && 'true' || 'false' }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Compile tracker before execution
+        run: python -m py_compile scripts/update_shadow_test_v16.py
+      - name: Update prospective signal ledger and outcomes
+        run: python scripts/update_shadow_test_v16.py
+      - name: Commit the shadow ledger and summaries
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/shadow artifacts/shadow_test_status.json artifacts/shadow_test_v16
+          if ! git diff --cached --quiet; then
+            git commit -m "Update prospective QC shadow test ledger"
+          fi
+          git pull --rebase origin main
+          git push
+      - name: Upload this run's status and portfolio summaries
+        uses: actions/upload-artifact@v7
+        with:
+          name: shadow-test-v16-\${{ github.run_id }}
+          path: |
+            artifacts/shadow_test_status.json
+            artifacts/shadow_test_v16/status.json
+            data/shadow/shadow_daily_portfolios.csv
+            data/shadow/shadow_group_summary.csv
+            data/shadow/shadow_qc_comparisons.csv
+          if-no-files-found: warn
+          retention-days: 90

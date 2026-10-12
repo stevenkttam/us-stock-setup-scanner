@@ -70,7 +70,7 @@ def main():
     for direction in ("Long","Short"):
         m=summary["directions"][direction]
         out.append(f"| {direction} | {m['selected']} | {pct(m['validation_model_excess5d'])} | {pct(m['validation_momentum_excess5d'])} | {pct(m['holdout_top40_trade_excess5d'])} | {pct(m['holdout_top40_trade_return5d'])} | {pct(m['holdout_top40_hit5d'])} |")
-    out += ["", "Returns above are gross and based on an equal-weight Top-40 ranking measured at each signal close; they do not include commissions, slippage, borrow fees, taxes or market impact.", "",
+    out += ["", "Signals are formed using data available at the close; the hypothetical entry is the next session open and the exit is the close h sessions after the signal. SPY is measured over the same open-to-close interval. Returns are gross and exclude commissions, slippage, borrow fees, taxes and market impact.", "",
             "## Holdout by horizon and Top-K", "",
             "| Direction | Ranking | Top-K | Days | Mean trade return | Mean excess vs SPY | Hit rate | N stock-date selections |",
             "|---|---|---:|---:|---:|---:|---:|---:|"]

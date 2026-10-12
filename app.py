@@ -211,11 +211,11 @@ else:
                         "Horizon": st.column_config.NumberColumn("Holding sessions"),
                         "SignalDates": st.column_config.NumberColumn("Signal dates", format="%d"),
                         "TotalTrades": st.column_config.NumberColumn("Completed events", format="%d"),
-                        "MeanDailyNetPnL": st.column_config.NumberColumn("Mean net return / date", format="%.2%%"),
-                        "NetCI95Low": st.column_config.NumberColumn("95% CI low", format="%.2%%"),
-                        "NetCI95High": st.column_config.NumberColumn("95% CI high", format="%.2%%"),
-                        "NetPositiveDatePct": st.column_config.NumberColumn("Positive dates", format="%.1%%"),
-                        "MeanSlotCoverage": st.column_config.NumberColumn("Slot coverage", format="%.1%%"),
+                        "MeanDailyNetPnL": st.column_config.NumberColumn("Mean net return / date", format="percent"),
+                        "NetCI95Low": st.column_config.NumberColumn("95% CI low", format="percent"),
+                        "NetCI95High": st.column_config.NumberColumn("95% CI high", format="percent"),
+                        "NetPositiveDatePct": st.column_config.NumberColumn("Positive dates", format="percent"),
+                        "MeanSlotCoverage": st.column_config.NumberColumn("Slot coverage", format="percent"),
                     },
                 )
             else:
@@ -258,9 +258,9 @@ else:
                     hide_index=True,
                     column_config={
                         "PairedSignalDates": st.column_config.NumberColumn("Paired dates", format="%d"),
-                        "MeanNetPnLDifference": st.column_config.NumberColumn("Mean net difference", format="%.2%%"),
-                        "DiffCI95Low": st.column_config.NumberColumn("95% CI low", format="%.2%%"),
-                        "DiffCI95High": st.column_config.NumberColumn("95% CI high", format="%.2%%"),
+                        "MeanNetPnLDifference": st.column_config.NumberColumn("Mean net difference", format="percent"),
+                        "DiffCI95Low": st.column_config.NumberColumn("95% CI low", format="percent"),
+                        "DiffCI95High": st.column_config.NumberColumn("95% CI high", format="percent"),
                         "ImprovementSupported": st.column_config.CheckboxColumn("CI entirely above zero"),
                     },
                 )

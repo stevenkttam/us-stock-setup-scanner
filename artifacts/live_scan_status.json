@@ -7,10 +7,14 @@
   "signal_date": "2026-10-09",
   "universe_size": 5359,
   "symbols_requested": 5359,
-  "symbols_downloaded": 5358,
+  "symbols_downloaded": 5359,
   "candidates": 117,
   "longs": 62,
   "shorts": 55,
+  "qc_flagged_candidates": 62,
+  "qc_unusual_volume_candidates": 2,
+  "qc_countertrend_candidates": 55,
   "regime": "Bullish",
+  "qc_note": "QC flags are review prompts only. They do not change the heuristic score or certify trade quality.",
   "execution_note": "SignalClose and stop/target are reference levels from the signal-date close. The planned entry is next-session open; recalculate levels after any opening gap."
 }

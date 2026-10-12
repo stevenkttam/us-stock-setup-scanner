@@ -1,0 +1,61 @@
+name: Research V13 Frozen EOD Replication - Fresh 1000 Stocks / 10 Years
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/eod_replication_v13.py"
+      - ".github/workflows/eod_replication_v13.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    env:
+      PYTHONPATH: .
+      PYTHONUNBUFFERED: "1"
+      SCANNER_MAX_SYMBOLS: "1000"
+      SCANNER_BATCH_SIZE: "50"
+      SCANNER_PERIOD: "10y"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run V13 frozen fresh-sample replication
+        run: python scripts/eod_replication_v13.py
+      - name: Publish summary to workflow run
+        run: |
+          python - <<'PY'
+          import json, pathlib, pandas as pd
+          root=pathlib.Path("artifacts/eod_replication_v13")
+          s=json.loads((root/"summary.json").read_text())
+          ci=pd.read_csv(root/"primary_holdout_confidence_intervals.csv")
+          with open("$GITHUB_STEP_SUMMARY","a") as f:
+              f.write("# V13 Frozen EOD Replication\n\n")
+              f.write(f"- Fresh symbols requested/downloaded: {s['symbols_requested']} / {s['symbols_downloaded']}\n")
+              f.write(f"- Eligible tickers / dates: {s['eligible_tickers']} / {s['unique_dates']}\n")
+              f.write("- Primary strategy frozen from V12 validation: Long = 20-day relative momentum; Short = model ranking. Top 40 / 5 days.\n\n")
+              f.write("| Direction | Frozen ranking | Dates | Mean daily excess | 95% block-bootstrap CI | Model minus momentum | Difference CI | Edge supported? |\n")
+              f.write("|---|---|---:|---:|---:|---:|---:|---|\n")
+              for _,r in ci.iterrows():
+                  f.write(f"| {r.Direction} | {r.FrozenRanking} | {int(r.Dates)} | {r.MeanDailyExcess:.2%} | [{r.ExcessCI95Low:.2%}, {r.ExcessCI95High:.2%}] | {r.ModelMinusMomentumMean:.2%} | [{r.DiffCI95Low:.2%}, {r.DiffCI95High:.2%}] | {'Yes' if r.PrimaryEdgeSupported else 'No'} |\n")
+              f.write("\nNo probability calibration or production approval is granted by this research run.\n")
+          PY
+      - name: Upload compact V13 results
+        uses: actions/upload-artifact@v7
+        with:
+          name: eod-replication-v13-fresh-1000-10y
+          path: |
+            artifacts/eod_replication_v13/summary.json
+            artifacts/eod_replication_v13/classification_metrics.csv
+            artifacts/eod_replication_v13/ranking_metrics.csv
+            artifacts/eod_replication_v13/daily_portfolio_returns.csv
+            artifacts/eod_replication_v13/primary_holdout_confidence_intervals.csv
+          retention-days: 30

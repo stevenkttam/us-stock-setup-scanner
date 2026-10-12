@@ -247,29 +247,24 @@ def block_bootstrap_ci(values, reps=BOOTSTRAP_REPS, block=5, seed=42):
     return float(x.mean()), float(np.quantile(estimates, 0.025)), float(np.quantile(estimates, 0.975))
 
 
-def build_daily_portfolios(candidates):
+def build_daily_portfolios(candidates, train_cut, holdout_cut, first_date, last_date):
     rows = []
-    dates = candidates["SignalDate"].drop_duplicates().sort_values().tolist()
-    total_dates = len(dates)
 
     for horizon in HORIZONS:
         ret_col = f"ForwardRet{horizon}"
         excess_col = f"ForwardExcess{horizon}"
         exit_col = f"ForwardExitDate{horizon}"
         valid = candidates.dropna(subset=[ret_col, excess_col, exit_col]).copy()
-        # Prevent forward outcomes crossing chronology boundaries.
-        # For each horizon, discard signals whose exit date falls outside its own partition.
-        valid = valid[(valid["Partition"] == "Train") & (valid[exit_col] < valid["SignalDate"].where(valid["Partition"].eq("Train"), pd.Timestamp.max))] if False else valid
 
         for (partition, date, direction), g in valid.groupby(["Partition", "SignalDate", "Direction"], sort=True):
-            # Split boundaries are carried in candidates; every outcome must finish in its
-            # signal-date partition or it is excluded from the corresponding report.
-            all_partition_dates = candidates.loc[candidates["Partition"].eq(partition), "SignalDate"]
-            if all_partition_dates.empty:
-                continue
-            partition_end = all_partition_dates.max()
-            partition_start = all_partition_dates.min()
-            g = g[(g[exit_col] >= partition_start) & (g[exit_col] <= partition_end)]
+            # Exclude any trade whose exit date crosses a chronological partition.
+            exit_dates = pd.to_datetime(g[exit_col])
+            if partition == "Train":
+                g = g[exit_dates < train_cut]
+            elif partition == "Validation":
+                g = g[(exit_dates >= train_cut) & (exit_dates < holdout_cut)]
+            else:
+                g = g[(exit_dates >= holdout_cut) & (exit_dates <= last_date)]
             if g.empty:
                 continue
             g = g.sort_values("SetupScore", ascending=False)
@@ -421,7 +416,7 @@ def main():
     candidate_path = out_dir / "historical_candidate_events.parquet"
     candidates.to_parquet(candidate_path, index=False)
 
-    daily = build_daily_portfolios(candidates)
+    daily = build_daily_portfolios(candidates, train_cut, holdout_cut, pd.Timestamp(market_dates[0]), pd.Timestamp(market_dates[-1]))
     if daily.empty:
         raise RuntimeError("No portfolios produced after applying chronology and outcome completeness checks.")
     summary_df = summarize_portfolios(daily)

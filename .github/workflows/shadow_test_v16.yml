@@ -11,7 +11,6 @@ on:
   workflow_run:
     workflows: ["Live Daily Scan"]
     types: [completed]
-  workflow_dispatch:
 
 permissions:
   contents: write
@@ -35,7 +34,7 @@ jobs:
         run: python tests/test_shadow_tracker_v16.py
 
   track:
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'schedule'
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:

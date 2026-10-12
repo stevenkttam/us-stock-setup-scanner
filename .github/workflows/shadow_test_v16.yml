@@ -39,7 +39,7 @@ jobs:
     env:
       PYTHONPATH: .
       PYTHONUNBUFFERED: "1"
-      SHADOW_ADD_NEW_SIGNALS: \${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && 'true' || 'false' }}
+      SHADOW_ADD_NEW_SIGNALS: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && 'true' || 'false' }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
@@ -64,7 +64,7 @@ jobs:
       - name: Upload this run's status and portfolio summaries
         uses: actions/upload-artifact@v7
         with:
-          name: shadow-test-v16-\${{ github.run_id }}
+          name: shadow-test-v16-${{ github.run_id }}
           path: |
             artifacts/shadow_test_status.json
             artifacts/shadow_test_v16/status.json

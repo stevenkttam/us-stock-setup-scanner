@@ -50,7 +50,8 @@ jobs:
               "Ticker", "Direction", "Setup", "SetupScore", "RVOL20",
               "VolumeAcceleration", "BaseDays", "BreakoutATR", "ATR20Pct",
               "RiskATR", "SignalClose", "Stop", "Target2R", "Trend",
-              "MarketRegime", "SignalDate", "Why", "ResearchStatus",
+              "MarketRegime", "SignalDate", "Why", "QualityStatus", "QualityFlags",
+              "MarketContext", "ResearchStatus",
           ]
           for direction, suffix in [("Long", "long"), ("Short", "short")]:
               part = df[df["Direction"].eq(direction)].sort_values("SetupScore", ascending=False).head(40)
@@ -60,6 +61,7 @@ jobs:
 
           status_path = artifacts / "live_scan_status.json"
           status = json.loads(status_path.read_text()) if status_path.exists() else {}
+          status["qc_export_fields"] = ["QualityStatus", "QualityFlags", "MarketContext"]
           status["exported_csv_files"] = [
               "data/latest_scan.csv",
               "data/latest_top40_long.csv",

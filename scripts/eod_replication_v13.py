@@ -151,8 +151,7 @@ def main():
     holdout_start=pd.Timestamp(dates.iloc[int(len(dates)*.80)])
     p.to_parquet(out/"v13_eod_panel.parquet",index=False)
     all_metrics=[];all_class=[];metas={};daily_all=[]
-    # Frozen from V12 validation: do not reselect rankings using V13 validation or holdout.
-    selected={"Long":"Momentum20Score","Short":"ModelProbability"}
+    # Compare both rankings directly; do not select a winner using this experiment's validation or holdout.
     for direction in ("Long","Short"):
         label="LongLabel" if direction=="Long" else "ShortLabel"
         required=FEATURES+[label]+[f"ForwardRet{h}" for h in HORIZONS]+[f"ForwardExcess{h}" for h in HORIZONS]
@@ -184,32 +183,35 @@ def main():
             "train_start":str(train["SignalDate"].min().date()),"train_end":str(train["SignalDate"].max().date()),
             "validation_start":str(val["SignalDate"].min().date()),"validation_end":str(val["SignalDate"].max().date()),
             "holdout_start":str(test["SignalDate"].min().date()),"holdout_end":str(test["SignalDate"].max().date()),
-            "frozen_primary_ranking":selected[direction],
             "holdout_AUC":float(roc_auc_score(test[label],test["ModelProbability"])) if test[label].nunique()>1 else None,
             "holdout_Brier":float(brier_score_loss(test[label],test["ModelProbability"]))}
     metrics=pd.DataFrame(all_metrics);classes=pd.DataFrame(all_class);daily=pd.concat(daily_all,ignore_index=True)
     metrics.to_csv(out/"ranking_metrics.csv",index=False);classes.to_csv(out/"classification_metrics.csv",index=False)
     daily.to_csv(out/"daily_portfolio_returns.csv",index=False)
-    # Confidence intervals are a predeclared decision check for fixed Top-40/5-day rankings.
+    # Compare model and fixed 20-day relative-momentum baseline side by side.
+    # V12 results had a feature-pipeline defect, so no V12-derived strategy choice is carried forward.
     ci_rows=[]
     for direction in ("Long","Short"):
-        ranking=selected[direction]
-        chosen=daily[(daily.Partition=="Holdout")&(daily.Direction==direction)&(daily.Ranking==ranking)&(daily.TopK==40)&(daily.Horizon==5)].sort_values("SignalDate")
         model=daily[(daily.Partition=="Holdout")&(daily.Direction==direction)&(daily.Ranking=="ModelProbability")&(daily.TopK==40)&(daily.Horizon==5)].sort_values("SignalDate")
         base=daily[(daily.Partition=="Holdout")&(daily.Direction==direction)&(daily.Ranking=="Momentum20Score")&(daily.TopK==40)&(daily.Horizon==5)].sort_values("SignalDate")
-        mean,lo,hi=bootstrap_ci(chosen["MeanTradeExcess"],seed=100 if direction=="Long" else 101)
         diff=pd.merge(model[["SignalDate","MeanTradeExcess"]],base[["SignalDate","MeanTradeExcess"]],on="SignalDate",suffixes=("_model","_momentum"))
         dm,dl,dh=bootstrap_ci(diff["MeanTradeExcess_model"]-diff["MeanTradeExcess_momentum"],seed=200 if direction=="Long" else 201)
-        ci_rows.append({"Direction":direction,"FrozenRanking":ranking,"Dates":len(chosen),"MeanDailyExcess":mean,"ExcessCI95Low":lo,"ExcessCI95High":hi,
-            "ModelMinusMomentumMean":dm,"DiffCI95Low":dl,"DiffCI95High":dh,"PrimaryEdgeSupported":bool(lo>0 and dl>0)})
-    cis=pd.DataFrame(ci_rows);cis.to_csv(out/"primary_holdout_confidence_intervals.csv",index=False)
-    summary={"research_version":"V13 Frozen EOD Replication","symbols_requested":len(symbols),"symbols_downloaded":len(prices),
+        for ranking,frame in (("ModelProbability",model),("Momentum20Score",base)):
+            mean,lo,hi=bootstrap_ci(frame["MeanTradeExcess"],seed=(100 if direction=="Long" else 101)+(0 if ranking=="ModelProbability" else 10))
+            ci_rows.append({"Direction":direction,"Ranking":ranking,"Dates":len(frame),
+                "MeanDailyExcess":mean,"ExcessCI95Low":lo,"ExcessCI95High":hi,
+                "PositiveExcessSupported":bool(lo>0),
+                "ModelMinusMomentumMean":dm,"DiffCI95Low":dl,"DiffCI95High":dh,
+                "ModelBeatsMomentumReliably":bool(dl>0)})
+    cis=pd.DataFrame(ci_rows)
+    cis.to_csv(out/"primary_holdout_confidence_intervals.csv",index=False)
+    summary={"research_version":"V13 EOD Model-vs-Momentum Fresh-Sample Replication","symbols_requested":len(symbols),"symbols_downloaded":len(prices),
         "eligible_panel_rows":len(p),"eligible_tickers":int(p.Ticker.nunique()),"unique_dates":int(p.SignalDate.nunique()),
         "primary_objective":"Top 20% Long / bottom 20% Short of 5-day forward excess return vs SPY",
-        "frozen_from_V12_validation":{"Long":"Momentum20Score","Short":"ModelProbability"},
+        "rankings_compared":["ModelProbability","Momentum20Score"],
+        "selection_policy":"No winning ranking selected from V13 validation or holdout; compare both directly on the untouched holdout",
         "split":"60% chronological train / 20% validation / 20% untouched holdout",
         "primary_test":"Top 40; 5-day holding period; mean daily equal-weight return and excess vs SPY; 5-session circular block bootstrap",
-        "no_reselection":"V13 validation and holdout do not change the V12-based ranking choice, features, or model hyperparameters",
         "probability_warning":"Balanced-class logistic outputs are ranking scores only; Brier diagnostics are reported, but values are not approved as calibrated probabilities",
         "survivorship_note":"Uses today's listing universe and a fresh current-universe ticker partition; historic delisted names and point-in-time membership are unavailable",
         "directions":metas,"primary_holdout_confidence_intervals":cis.to_dict(orient="records")}

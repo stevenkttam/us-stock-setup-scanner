@@ -41,7 +41,8 @@ jobs:
     env:
       PYTHONPATH: .
       PYTHONUNBUFFERED: "1"
-      SHADOW_ADD_NEW_SIGNALS: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && 'true' || 'false' }}
+      SHADOW_ADD_NEW_SIGNALS: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.event == 'schedule' && github.event.workflow_run.conclusion == 'success' && 'true' || 'false' }}
+      SHADOW_EXPECTED_SIGNAL_DATE: ${{ github.event.workflow_run.created_at || '' }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7

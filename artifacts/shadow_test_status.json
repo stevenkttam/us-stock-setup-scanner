@@ -1,0 +1,53 @@
+{
+  "status": "success",
+  "research_version": "V16 Prospective QC Shadow Test",
+  "research_only": true,
+  "production_ready": false,
+  "new_signals_added_this_run": 80,
+  "signal_seed_note": "added 80 unique candidate events for signal date 2026-10-12",
+  "allow_new_signals": true,
+  "ledger_events": 80,
+  "unique_signal_dates": 1,
+  "long_events": 36,
+  "short_events": 44,
+  "valid_signal_bars": 80,
+  "invalid_signal_bars": 0,
+  "completed_1d_outcomes": 0,
+  "completed_3d_outcomes": 0,
+  "completed_5d_outcomes": 0,
+  "completed_10d_outcomes": 0,
+  "outcome_update_counts_this_run": {
+    "complete": 0,
+    "pending": 0,
+    "invalid": 0
+  },
+  "latest_market_date": "2026-10-12",
+  "cost_assumptions": {
+    "Base": {
+      "round_trip_cost_bps": 10.0,
+      "annual_short_borrow_rate": 0.03
+    },
+    "Stress": {
+      "round_trip_cost_bps": 25.0,
+      "annual_short_borrow_rate": 0.1
+    }
+  },
+  "execution_convention": "EOD signal; entry next SPY session open; exit close of the h-th session after the signal; all outcomes require exact stock bars on entry/exit dates and are benchmarked over the matched SPY window.",
+  "group_summary_rows": 0,
+  "comparison_rows": 0,
+  "thresholds_or_scores_changed": false,
+  "limitations": [
+    "This is prospective shadow tracking, not a live strategy or recommendation.",
+    "New signal rows are inserted only after a successful Live Daily Scan workflow run and only when the snapshot date matches the latest SPY date.",
+    "Transaction-cost and short-borrow inputs are fixed assumptions, not broker-specific actual costs.",
+    "No look-ahead is intended: outcomes become complete only after the specified exit close is present.",
+    "Missing/stale stock bars are flagged and not silently shifted to a different trading date.",
+    "Current-universe membership and source-data limitations still prevent a fully survivorship-free record."
+  ],
+  "data_files": [
+    "data/shadow/shadow_ledger.csv",
+    "data/shadow/shadow_daily_portfolios.csv",
+    "data/shadow/shadow_group_summary.csv",
+    "data/shadow/shadow_qc_comparisons.csv"
+  ]
+}

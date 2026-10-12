@@ -9,6 +9,7 @@ import pandas as pd
 
 from scanner.config import ROOT
 from scanner.data import download_daily
+from scanner.universe import fetch_us_universe
 
 
 HORIZONS = (1, 3, 5, 10)
@@ -454,7 +455,13 @@ def main():
     spy = normalize_dates(spy)
     calendar = pd.DatetimeIndex(spy.index).normalize().unique().sort_values()
 
-    symbol_map = load_universe_mapping(data_dir / "universe.csv")
+    try:
+        current_universe = fetch_us_universe(data_dir / "universe.csv", refresh=True)
+        symbol_map = dict(zip(current_universe["Symbol"].astype(str), current_universe["YahooSymbol"].astype(str)))
+        print(f"Refreshed Yahoo ticker mapping for {len(symbol_map)} listed symbols.", flush=True)
+    except Exception as exc:
+        symbol_map = load_universe_mapping(data_dir / "universe.csv")
+        print(f"Universe refresh failed; using cached ticker mapping ({type(exc).__name__}: {exc}).", flush=True)
     # Only download stocks with incomplete outcomes plus today's candidates if the event allows a new signal.
     allow_new = os.getenv("SHADOW_ADD_NEW_SIGNALS", "false").lower() == "true"
     expected_signal_date = os.getenv("SHADOW_EXPECTED_SIGNAL_DATE", "").strip()

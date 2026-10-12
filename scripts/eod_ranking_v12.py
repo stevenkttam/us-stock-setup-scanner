@@ -43,6 +43,11 @@ def build(px,spy,t):
  sr={h:sp.pct_change(h,fill_method=None).reindex(f.index) for h in H}
  for h in H:
   f[f"Ret{h}"]=c.pct_change(h,fill_method=None); f[f"Excess{h}"]=f[f"Ret{h}"]-sr[h]
+ # Longer-lookback return features used by the model (not forward-label horizons).
+ for h in (20,60,120,252):
+  f[f"Ret{h}"]=c.pct_change(h,fill_method=None)
+ for h in (20,60):
+  f[f"Excess{h}"]=f[f"Ret{h}"]-sp.pct_change(h,fill_method=None).reindex(f.index)
  f["EMADist20"]=(c-f.EMA20)/c; f["EMADist50"]=(c-f.EMA50)/c; f["EMADist200"]=(c-f.EMA200)/c
  f["EMASlope20_5"]=f.EMA20/f.EMA20.shift(5)-1; f["EMASlope50_10"]=f.EMA50/f.EMA50.shift(10)-1
  f["ATR20Pct"]=f.ATR20/c; f["ATR10Pct"]=f.ATR10/c

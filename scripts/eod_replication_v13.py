@@ -49,9 +49,11 @@ def make_features(px,spy,ticker):
     close=pd.to_numeric(f["Close"],errors="coerce")
     vol=pd.to_numeric(f["Volume"],errors="coerce")
     spy_close=pd.to_numeric(spy["Close"],errors="coerce").sort_index()
+    spy_open=pd.to_numeric(spy["Open"],errors="coerce").sort_index()
     spy_ret={h:spy_close.pct_change(h,fill_method=None).reindex(f.index) for h in HORIZONS}
-    # Forward outcomes must subtract SPY's return over the same future window.
-    spy_forward={h:(spy_close.shift(-h)/spy_close-1).reindex(f.index) for h in HORIZONS}
+    # Tradable outcomes: enter at the next session open; exit at the close h sessions after signal.
+    # Match SPY's return to the exact same open-to-close interval.
+    spy_forward={h:(spy_close.shift(-h)/spy_open.shift(-1)-1).reindex(f.index) for h in HORIZONS}
     for h in HORIZONS:
         f[f"Ret{h}"]=close.pct_change(h,fill_method=None)
         f[f"Excess{h}"]=f[f"Ret{h}"]-spy_ret[h]
@@ -88,7 +90,7 @@ def make_features(px,spy,ticker):
     f["Ticker"]=ticker
     f["SignalDate"]=pd.to_datetime(f.index)
     for h in HORIZONS:
-        f[f"ForwardRet{h}"]=close.shift(-h)/close-1
+        f[f"ForwardRet{h}"]=close.shift(-h)/pd.to_numeric(f["Open"],errors="coerce").shift(-1)-1
         f[f"ForwardExcess{h}"]=f[f"ForwardRet{h}"]-spy_forward[h]
     return f.replace([np.inf,-np.inf],np.nan)
 

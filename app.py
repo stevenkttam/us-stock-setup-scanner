@@ -201,7 +201,7 @@ else:
                     view[[
                         c for c in [
                             "Direction", "QCGroup", "Horizon", "SignalDates", "TotalTrades",
-                            "MeanDailyNetPnL", "NetCI95Low", "NetCI95High",
+                            "MeanDailyNetPnL", "MeanNetPnLPerTrade", "NetCI95Low", "NetCI95High",
                             "NetPositiveDatePct", "MeanSlotCoverage", "CIStatus",
                         ] if c in view.columns
                     ]],
@@ -211,7 +211,8 @@ else:
                         "Horizon": st.column_config.NumberColumn("Holding sessions"),
                         "SignalDates": st.column_config.NumberColumn("Signal dates", format="%d"),
                         "TotalTrades": st.column_config.NumberColumn("Completed events", format="%d"),
-                        "MeanDailyNetPnL": st.column_config.NumberColumn("Mean net return / date", format="percent"),
+                        "MeanDailyNetPnL": st.column_config.NumberColumn("Portfolio net return / date", format="percent", help="Return is normalized to the target Top 10 slots; unused slots are treated as cash at 0% return."),
+                        "MeanNetPnLPerTrade": st.column_config.NumberColumn("Mean net per filled trade", format="percent"),
                         "NetCI95Low": st.column_config.NumberColumn("95% CI low", format="percent"),
                         "NetCI95High": st.column_config.NumberColumn("95% CI high", format="percent"),
                         "NetPositiveDatePct": st.column_config.NumberColumn("Positive dates", format="percent"),
@@ -251,7 +252,7 @@ else:
                     compare[[
                         c for c in [
                             "Direction", "Comparison", "PairedSignalDates", "MeanNetPnLDifference",
-                            "DiffCI95Low", "DiffCI95High", "ImprovementSupported", "CIStatus",
+                            "DiffCI95Low", "DiffCI95High", "DifferencePositiveSupported", "CIStatus",
                         ] if c in compare.columns
                     ]],
                     use_container_width=True,
@@ -261,12 +262,14 @@ else:
                         "MeanNetPnLDifference": st.column_config.NumberColumn("Mean net difference", format="percent"),
                         "DiffCI95Low": st.column_config.NumberColumn("95% CI low", format="percent"),
                         "DiffCI95High": st.column_config.NumberColumn("95% CI high", format="percent"),
-                        "ImprovementSupported": st.column_config.CheckboxColumn("CI entirely above zero"),
+                        "DifferencePositiveSupported": st.column_config.CheckboxColumn("CI entirely above zero"),
                     },
                 )
                 st.caption(
-                    "A filter is not considered supported merely because its average is positive; "
-                    "the 95% interval for the paired difference must be entirely above zero."
+                    "Returns are normalized to the target 10 slots, with unused slots treated as cash. "
+                    "A positive QC-group-minus-All difference means that group did better; the 95% interval "
+                    "must be entirely above zero to support a positive difference. A QC-flagged group doing better "
+                    "would argue against excluding flagged names."
                 )
             else:
                 st.info("No paired comparison rows are available for this holding period.")

@@ -228,6 +228,8 @@ else:
     if shadow_summary_path.exists():
         try:
             shadow_summary = pd.read_csv(shadow_summary_path)
+        except pd.errors.EmptyDataError:
+            shadow_summary = pd.DataFrame()
         except Exception as exc:
             shadow_summary = pd.DataFrame()
             st.warning(f"Could not read shadow group summary: {exc}")
@@ -281,6 +283,8 @@ else:
     if shadow_comparison_path.exists():
         try:
             shadow_comparisons = pd.read_csv(shadow_comparison_path)
+        except pd.errors.EmptyDataError:
+            shadow_comparisons = pd.DataFrame()
         except Exception as exc:
             shadow_comparisons = pd.DataFrame()
             st.warning(f"Could not read shadow QC comparisons: {exc}")

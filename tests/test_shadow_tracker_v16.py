@@ -9,6 +9,7 @@ from scripts.update_shadow_test_v16 import (
     date_text,
     horizon_dates,
     net_directional_pnl,
+    make_daily_portfolios,
     normalize_dates,
     quality_flags,
     signal_key,
@@ -105,6 +106,61 @@ class ShadowTrackerTests(unittest.TestCase):
         self.assertEqual(len(ledger), 1)
         self.assertEqual(ledger.iloc[0]["YahooSymbol"], "ABC")
         self.assertEqual(ledger.iloc[0]["SignalRank"], 1)
+
+    def test_filtered_portfolio_returns_use_fixed_target_slot_denominator(self):
+        ledger = pd.DataFrame([
+            {
+                "SignalDate": "2026-01-05",
+                "Ticker": ticker,
+                "Direction": "Long",
+                "SignalRank": rank,
+                "SetupScore": score,
+                "QCFlagged": flagged,
+                "QCUnusualVolume": False,
+                "SignalBarStatus": "valid",
+                "OutcomeStatus_1d": "complete",
+                "OutcomeStatus_3d": "pending",
+                "OutcomeStatus_5d": "pending",
+                "OutcomeStatus_10d": "pending",
+                "DirectionalGrossPnL_1d": gross,
+                "DirectionalExcessVsSPY_1d": gross,
+                "NetBase_1d": net,
+                "NetStress_1d": net - 0.0015,
+            }
+            for ticker, rank, score, flagged, gross, net in [
+                ("AAA", 1, 90, False, 0.10, 0.099),
+                ("BBB", 2, 80, False, 0.10, 0.099),
+                ("CCC", 3, 70, True, -0.01, -0.011),
+                ("DDD", 4, 60, True, -0.01, -0.011),
+            ]
+        ])
+
+        daily = make_daily_portfolios(ledger)
+        base = daily[
+            (daily["QCGroup"] == "All")
+            & (daily["TopK"] == 10)
+            & (daily["Horizon"] == 1)
+            & (daily["CostScenario"] == "Base")
+        ].iloc[0]
+        clear = daily[
+            (daily["QCGroup"] == "QC Clear")
+            & (daily["TopK"] == 10)
+            & (daily["Horizon"] == 1)
+            & (daily["CostScenario"] == "Base")
+        ].iloc[0]
+        flagged = daily[
+            (daily["QCGroup"] == "QC Flagged")
+            & (daily["TopK"] == 10)
+            & (daily["Horizon"] == 1)
+            & (daily["CostScenario"] == "Base")
+        ].iloc[0]
+
+        self.assertAlmostEqual(float(base["SlotCoverage"]), 0.4, places=12)
+        self.assertAlmostEqual(float(base["MeanNetPnL"]), (0.099 + 0.099 - 0.011 - 0.011) / 10, places=12)
+        self.assertAlmostEqual(float(clear["SlotCoverage"]), 0.2, places=12)
+        self.assertAlmostEqual(float(clear["MeanNetPnL"]), 0.099 * 2 / 10, places=12)
+        self.assertAlmostEqual(float(clear["MeanNetPnLPerTrade"]), 0.099, places=12)
+        self.assertAlmostEqual(float(flagged["MeanNetPnL"]), -0.011 * 2 / 10, places=12)
 
     def test_qc_flags_are_preserved_as_group_labels(self):
         result = quality_flags({

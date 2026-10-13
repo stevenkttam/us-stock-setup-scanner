@@ -578,6 +578,26 @@ def main():
     summary.to_csv(summary_path, index=False)
     comparisons.to_csv(comparisons_path, index=False)
 
+    outcome_status_counts = {}
+    for horizon in HORIZONS:
+        column = f"OutcomeStatus_{horizon}d"
+        values = ledger[column].fillna("pending").astype(str) if not ledger.empty and column in ledger.columns else pd.Series(dtype=str)
+        complete_count = int(values.eq("complete").sum())
+        pending_count = int(values.isin(["", "nan", "None", "pending"]).sum())
+        invalid_count = int((~values.isin(["", "nan", "None", "pending", "complete"])).sum())
+        outcome_status_counts[str(horizon)] = {
+            "complete": complete_count,
+            "pending": pending_count,
+            "invalid": invalid_count,
+        }
+
+    qc_counts = {
+        "clear": int((~ledger["QCFlagged"].astype(bool)).sum()) if not ledger.empty else 0,
+        "flagged": int(ledger["QCFlagged"].astype(bool).sum()) if not ledger.empty else 0,
+        "unusual_volume": int(ledger["QCUnusualVolume"].astype(bool).sum()) if not ledger.empty else 0,
+        "countertrend": int(ledger["QCCountertrend"].astype(bool).sum()) if not ledger.empty else 0,
+    }
+
     status = {
         "status": "success",
         "research_version": "V16 Prospective QC Shadow Test",
@@ -592,10 +612,20 @@ def main():
         "short_events": int(ledger["Direction"].eq("Short").sum()) if not ledger.empty else 0,
         "valid_signal_bars": int(ledger["SignalBarStatus"].eq("valid").sum()) if not ledger.empty and "SignalBarStatus" in ledger.columns else 0,
         "invalid_signal_bars": int(ledger["SignalBarStatus"].astype(str).str.startswith("invalid").sum()) if not ledger.empty and "SignalBarStatus" in ledger.columns else 0,
-        "completed_1d_outcomes": int((ledger["OutcomeStatus_1d"] == "complete").sum()) if not ledger.empty else 0,
-        "completed_3d_outcomes": int((ledger["OutcomeStatus_3d"] == "complete").sum()) if not ledger.empty else 0,
-        "completed_5d_outcomes": int((ledger["OutcomeStatus_5d"] == "complete").sum()) if not ledger.empty else 0,
-        "completed_10d_outcomes": int((ledger["OutcomeStatus_10d"] == "complete").sum()) if not ledger.empty else 0,
+        "completed_1d_outcomes": outcome_status_counts["1"]["complete"],
+        "pending_1d_outcomes": outcome_status_counts["1"]["pending"],
+        "invalid_1d_outcomes": outcome_status_counts["1"]["invalid"],
+        "completed_3d_outcomes": outcome_status_counts["3"]["complete"],
+        "pending_3d_outcomes": outcome_status_counts["3"]["pending"],
+        "invalid_3d_outcomes": outcome_status_counts["3"]["invalid"],
+        "completed_5d_outcomes": outcome_status_counts["5"]["complete"],
+        "pending_5d_outcomes": outcome_status_counts["5"]["pending"],
+        "invalid_5d_outcomes": outcome_status_counts["5"]["invalid"],
+        "completed_10d_outcomes": outcome_status_counts["10"]["complete"],
+        "pending_10d_outcomes": outcome_status_counts["10"]["pending"],
+        "invalid_10d_outcomes": outcome_status_counts["10"]["invalid"],
+        "outcome_status_counts_by_horizon": outcome_status_counts,
+        "qc_event_counts": qc_counts,
         "outcome_update_counts_this_run": outcome_counts,
         "latest_market_date": date_text(calendar[-1]),
         "cost_assumptions": COSTS,

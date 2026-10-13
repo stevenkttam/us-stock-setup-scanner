@@ -150,6 +150,13 @@ else:
         except (OSError, json.JSONDecodeError) as exc:
             st.warning(f"Shadow-test status file could not be read: {exc}")
 
+    shadow_ledger_snapshot = pd.DataFrame()
+    if shadow_ledger_path.exists():
+        try:
+            shadow_ledger_snapshot = pd.read_csv(shadow_ledger_path)
+        except Exception as exc:
+            st.warning(f"Shadow signal ledger could not be read for status reconciliation: {exc}")
+
     if not shadow_status:
         st.info(
             "The prospective shadow tracker has not published its first status file yet. "
@@ -165,9 +172,21 @@ else:
 
         o1, o2, o3, o4 = st.columns(4)
         for metric, horizon in [(o1, 1), (o2, 3), (o3, 5), (o4, 10)]:
-            complete = int(shadow_status.get(f"completed_{horizon}d_outcomes", 0))
-            pending = int(shadow_status.get(f"pending_{horizon}d_outcomes", 0))
-            invalid = int(shadow_status.get(f"invalid_{horizon}d_outcomes", 0))
+            outcome_column = f"OutcomeStatus_{horizon}d"
+            outcome_values = (
+                shadow_ledger_snapshot[outcome_column].fillna("pending").astype(str)
+                if not shadow_ledger_snapshot.empty and outcome_column in shadow_ledger_snapshot.columns
+                else pd.Series(dtype=str)
+            )
+            complete = int(shadow_status.get(f"completed_{horizon}d_outcomes", outcome_values.eq("complete").sum()))
+            pending = int(shadow_status.get(
+                f"pending_{horizon}d_outcomes",
+                outcome_values.isin(["", "nan", "None", "pending"]).sum(),
+            ))
+            invalid = int(shadow_status.get(
+                f"invalid_{horizon}d_outcomes",
+                (~outcome_values.isin(["", "nan", "None", "pending", "complete"])).sum(),
+            ))
             metric.metric(
                 f"{horizon}-session outcomes",
                 f"{complete:,} complete",
@@ -176,6 +195,18 @@ else:
             )
 
         qc_counts = shadow_status.get("qc_event_counts", {})
+        if not qc_counts and not shadow_ledger_snapshot.empty:
+            for col in ("QCFlagged", "QCUnusualVolume", "QCCountertrend"):
+                if col in shadow_ledger_snapshot.columns:
+                    shadow_ledger_snapshot[col] = shadow_ledger_snapshot[col].map(
+                        lambda value: str(value).lower() in ("true", "1", "yes") if pd.notna(value) else False
+                    )
+            qc_counts = {
+                "clear": int((~shadow_ledger_snapshot["QCFlagged"]).sum()) if "QCFlagged" in shadow_ledger_snapshot.columns else 0,
+                "flagged": int(shadow_ledger_snapshot["QCFlagged"].sum()) if "QCFlagged" in shadow_ledger_snapshot.columns else 0,
+                "unusual_volume": int(shadow_ledger_snapshot["QCUnusualVolume"].sum()) if "QCUnusualVolume" in shadow_ledger_snapshot.columns else 0,
+                "countertrend": int(shadow_ledger_snapshot["QCCountertrend"].sum()) if "QCCountertrend" in shadow_ledger_snapshot.columns else 0,
+            }
         st.caption(
             f"QC composition across the recorded ledger: "
             f"{int(qc_counts.get('clear', 0)):,} clear · "

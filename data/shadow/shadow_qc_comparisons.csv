@@ -1,1 +1,33 @@
-
+Direction,CostScenario,Horizon,Comparison,PairedSignalDates,MeanNetPnLDifference,DiffCI95Low,DiffCI95High,DifferencePositiveSupported,CIStatus,MinimumPairedDates,FilterEvidenceStatus
+Long,Base,1,QC Clear minus All,1,0.0904696924455462,,,False,need >= 20 paired scorable dates for block CI,200,Collecting; need 200 paired dates under both cost cases
+Long,Base,1,QC Flagged minus All,1,-0.0034046857238734657,,,False,need >= 20 paired scorable dates for block CI,200,Collecting; need 200 paired dates under both cost cases
+Long,Stress,1,QC Clear minus All,1,0.09046969244554617,,,False,need >= 20 paired scorable dates for block CI,200,Collecting; need 200 paired dates under both cost cases
+Long,Stress,1,QC Flagged minus All,1,-0.0025046857238734815,,,False,need >= 20 paired scorable dates for block CI,200,Collecting; need 200 paired dates under both cost cases
+Short,Base,1,QC Clear minus All,1,0.000597426695692993,,,False,need >= 20 paired scorable dates for block CI,200,Collecting; need 200 paired dates under both cost cases
+Short,Base,1,QC Flagged minus All,1,0.0,,,False,need >= 20 paired scorable dates for block CI,200,Collecting; need 200 paired dates under both cost cases
+Short,Stress,1,QC Clear minus All,1,0.0023752044734707697,,,False,need >= 20 paired scorable dates for block CI,200,Collecting; need 200 paired dates under both cost cases
+Short,Stress,1,QC Flagged minus All,1,0.0,,,False,need >= 20 paired scorable dates for block CI,200,Collecting; need 200 paired dates under both cost cases
+Long,Base,3,QC Clear minus All,0,,,,False,need >= 20 paired scorable dates for block CI,200,Collecting; need 200 paired dates under both cost cases
+Long,Base,3,QC Flagged minus All,0,,,,False,need >= 20 paired scorable dates for block CI,200,Collecting; need 200 paired dates under both cost cases
+Long,Stress,3,QC Clear minus All,0,,,,False,need >= 20 paired scorable dates for block CI,200,Collecting; need 200 paired dates under both cost cases
+Long,Stress,3,QC Flagged minus All,0,,,,False,need >= 20 paired scorable dates for block CI,200,Collecting; need 200 paired dates under both cost cases
+Short,Base,3,QC Clear minus All,0,,,,False,need >= 20 paired scorable dates for block CI,200,Collecting; need 200 paired dates under both cost cases
+Short,Base,3,QC Flagged minus All,0,,,,False,need >= 20 paired scorable dates for block CI,200,Collecting; need 200 paired dates under both cost cases
+Short,Stress,3,QC Clear minus All,0,,,,False,need >= 20 paired scorable dates for block CI,200,Collecting; need 200 paired dates under both cost cases
+Short,Stress,3,QC Flagged minus All,0,,,,False,need >= 20 paired scorable dates for block CI,200,Collecting; need 200 paired dates under both cost cases
+Long,Base,5,QC Clear minus All,0,,,,False,need >= 20 paired scorable dates for block CI,200,Collecting; need 200 paired dates under both cost cases
+Long,Base,5,QC Flagged minus All,0,,,,False,need >= 20 paired scorable dates for block CI,200,Collecting; need 200 paired dates under both cost cases
+Long,Stress,5,QC Clear minus All,0,,,,False,need >= 20 paired scorable dates for block CI,200,Collecting; need 200 paired dates under both cost cases
+Long,Stress,5,QC Flagged minus All,0,,,,False,need >= 20 paired scorable dates for block CI,200,Collecting; need 200 paired dates under both cost cases
+Short,Base,5,QC Clear minus All,0,,,,False,need >= 20 paired scorable dates for block CI,200,Collecting; need 200 paired dates under both cost cases
+Short,Base,5,QC Flagged minus All,0,,,,False,need >= 20 paired scorable dates for block CI,200,Collecting; need 200 paired dates under both cost cases
+Short,Stress,5,QC Clear minus All,0,,,,False,need >= 20 paired scorable dates for block CI,200,Collecting; need 200 paired dates under both cost cases
+Short,Stress,5,QC Flagged minus All,0,,,,False,need >= 20 paired scorable dates for block CI,200,Collecting; need 200 paired dates under both cost cases
+Long,Base,10,QC Clear minus All,0,,,,False,need >= 20 paired scorable dates for block CI,200,Collecting; need 200 paired dates under both cost cases
+Long,Base,10,QC Flagged minus All,0,,,,False,need >= 20 paired scorable dates for block CI,200,Collecting; need 200 paired dates under both cost cases
+Long,Stress,10,QC Clear minus All,0,,,,False,need >= 20 paired scorable dates for block CI,200,Collecting; need 200 paired dates under both cost cases
+Long,Stress,10,QC Flagged minus All,0,,,,False,need >= 20 paired scorable dates for block CI,200,Collecting; need 200 paired dates under both cost cases
+Short,Base,10,QC Clear minus All,0,,,,False,need >= 20 paired scorable dates for block CI,200,Collecting; need 200 paired dates under both cost cases
+Short,Base,10,QC Flagged minus All,0,,,,False,need >= 20 paired scorable dates for block CI,200,Collecting; need 200 paired dates under both cost cases
+Short,Stress,10,QC Clear minus All,0,,,,False,need >= 20 paired scorable dates for block CI,200,Collecting; need 200 paired dates under both cost cases
+Short,Stress,10,QC Flagged minus All,0,,,,False,need >= 20 paired scorable dates for block CI,200,Collecting; need 200 paired dates under both cost cases

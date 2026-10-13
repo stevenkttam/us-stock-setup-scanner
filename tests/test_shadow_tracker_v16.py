@@ -1,4 +1,6 @@
 import unittest
+import tempfile
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -14,6 +16,7 @@ from scripts.update_shadow_test_v16 import (
     make_daily_portfolios,
     summarize_daily_portfolios,
     update_outcomes,
+    write_human_report,
     normalize_dates,
     quality_flags,
     signal_key,
@@ -334,6 +337,38 @@ class ShadowTrackerTests(unittest.TestCase):
         gated_summary, _ = apply_evidence_gates(summary, pd.DataFrame())
         self.assertEqual(gated_summary.iloc[0]["DecisionStatus"], "No confirmed positive net edge under both cost cases")
         self.assertEqual(gated_summary.iloc[1]["DecisionStatus"], "No confirmed positive net edge under both cost cases")
+
+    def test_human_report_includes_pending_maturity_and_research_warning(self):
+        status = {
+            "status": "success",
+            "research_only": True,
+            "latest_market_date": "2026-10-12",
+            "ledger_events": 80,
+            "unique_signal_dates": 1,
+            "long_events": 36,
+            "short_events": 44,
+            "new_signals_added_this_run": 80,
+            "completed_1d_outcomes": 0,
+            "pending_1d_outcomes": 80,
+            "invalid_1d_outcomes": 0,
+            "completed_3d_outcomes": 0,
+            "pending_3d_outcomes": 80,
+            "invalid_3d_outcomes": 0,
+            "completed_5d_outcomes": 0,
+            "pending_5d_outcomes": 80,
+            "invalid_5d_outcomes": 0,
+            "completed_10d_outcomes": 0,
+            "pending_10d_outcomes": 80,
+            "invalid_10d_outcomes": 0,
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp) / "report.md"
+            write_human_report(status, pd.DataFrame(), pd.DataFrame(), output)
+            report = output.read_text(encoding="utf-8")
+        self.assertIn("80", report)
+        self.assertIn("Pending events", report)
+        self.assertIn("No portfolio summary rows are available yet.", report)
+        self.assertIn("research-only shadow test", report)
 
     def test_qc_flags_are_preserved_as_group_labels(self):
         result = quality_flags({

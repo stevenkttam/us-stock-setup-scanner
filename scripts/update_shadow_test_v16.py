@@ -451,9 +451,12 @@ def block_bootstrap_ci(values, reps=2500, block=BOOTSTRAP_BLOCK_SESSIONS, seed=4
     x = np.asarray(values, dtype=float)
     x = x[np.isfinite(x)]
     n = len(x)
-    # A block bootstrap needs at least two full-length blocks to avoid a degenerate CI.
-    if n < 2 * block:
+    if n == 0:
         return np.nan, np.nan, np.nan
+    observed_mean = float(np.mean(x))
+    # Display descriptive means early, but do not fabricate a CI from fewer than two full blocks.
+    if n < 2 * block:
+        return observed_mean, np.nan, np.nan
     rng = np.random.default_rng(seed)
     estimates = np.empty(reps)
     blocks_needed = int(np.ceil(n / block))

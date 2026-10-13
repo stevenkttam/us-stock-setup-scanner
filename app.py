@@ -371,6 +371,13 @@ else:
                 },
             )
 
+shadow_report_path = Path("artifacts/shadow_test_v16/report.md")
+if shadow_report_path.exists():
+    st.markdown(
+        "[Open the latest readable shadow-test report on GitHub]"
+        "(https://github.com/stevenkttam/us-stock-setup-scanner/blob/main/artifacts/shadow_test_v16/report.md)"
+    )
+
 st.divider()
 st.subheader("Backtest / Model Health")
 if mode == "Live data":

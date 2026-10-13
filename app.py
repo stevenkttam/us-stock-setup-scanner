@@ -239,7 +239,8 @@ else:
             st.caption(
                 "The tracker freezes the selected candidate cohort before checking returns. Results stay pending until "
                 "the selected signals mature; a terminal missing-data issue makes that portfolio-date unscorable rather "
-                "than replacing the candidate. Unused portfolio slots are treated as cash at 0% return."
+                "than replacing the candidate. Unused portfolio slots are treated as cash at 0% return. Descriptive means "
+                "can appear early, but confidence intervals require at least 20 scorable dates."
             )
             view = shadow_summary[
                 (pd.to_numeric(shadow_summary.get("TopK"), errors="coerce") == 10)
@@ -255,7 +256,7 @@ else:
                         c for c in [
                             "Direction", "QCGroup", "Horizon", "SignalDates", "ScorableDates", "PendingDates", "UnscorableDates",
                             "PendingOutcomeSlots", "MissingOutcomeSlots", "TotalTrades", "MeanDailyNetPnL", "MeanNetPnLPerTrade", "NetCI95Low", "NetCI95High",
-                            "NetPositiveDatePct", "MeanSlotCoverage", "CIStatus",
+                            "NetPositiveDatePct", "MeanSlotCoverage", "DecisionStatus", "CIStatus",
                         ] if c in view.columns
                     ]],
                     use_container_width=True,
@@ -275,6 +276,7 @@ else:
                         "NetCI95High": st.column_config.NumberColumn("95% CI high", format="percent"),
                         "NetPositiveDatePct": st.column_config.NumberColumn("Positive dates", format="percent"),
                         "MeanSlotCoverage": st.column_config.NumberColumn("Slot coverage", format="percent"),
+                        "DecisionStatus": st.column_config.TextColumn("Evidence gate", help="Requires 200 scorable dates and positive 95% block-bootstrap intervals under both cost assumptions. Passing remains research-only."),
                     },
                 )
             else:
@@ -312,7 +314,7 @@ else:
                     compare[[
                         c for c in [
                             "Direction", "Comparison", "PairedSignalDates", "MeanNetPnLDifference",
-                            "DiffCI95Low", "DiffCI95High", "DifferencePositiveSupported", "CIStatus",
+                            "DiffCI95Low", "DiffCI95High", "DifferencePositiveSupported", "FilterEvidenceStatus", "CIStatus",
                         ] if c in compare.columns
                     ]],
                     use_container_width=True,
@@ -323,13 +325,15 @@ else:
                         "DiffCI95Low": st.column_config.NumberColumn("95% CI low", format="percent"),
                         "DiffCI95High": st.column_config.NumberColumn("95% CI high", format="percent"),
                         "DifferencePositiveSupported": st.column_config.CheckboxColumn("CI entirely above zero"),
+                        "FilterEvidenceStatus": st.column_config.TextColumn("QC evidence gate", help="Requires 200 paired dates and positive paired-difference lower bounds under both cost assumptions."),
                     },
                 )
                 st.caption(
                     "Returns are normalized to the target 10 slots, with unused slots treated as cash. "
                     "A positive QC-group-minus-All difference means that group did better; the 95% interval "
                     "must be entirely above zero to support a positive difference. A QC-flagged group doing better "
-                    "would argue against excluding flagged names."
+                    "would argue against excluding flagged names. The evidence gate requires at least 200 paired signal "
+                    "dates and a positive difference interval under both cost assumptions."
                 )
             else:
                 st.info("No paired comparison rows are available for this holding period.")

@@ -10,6 +10,8 @@ from scripts.update_shadow_test_v16 import (
     horizon_dates,
     net_directional_pnl,
     make_daily_portfolios,
+    summarize_daily_portfolios,
+    update_outcomes,
     normalize_dates,
     quality_flags,
     signal_key,
@@ -193,8 +195,95 @@ class ShadowTrackerTests(unittest.TestCase):
             (daily["QCGroup"] == "All")
             & (daily["TopK"] == 10)
             & (daily["Horizon"] == 1)
-        ]
-        self.assertTrue(all_portfolio.empty)
+            & (daily["CostScenario"] == "Base")
+        ].iloc[0]
+        self.assertEqual(all_portfolio["PortfolioStatus"], "pending_outcomes")
+        self.assertEqual(int(all_portfolio["PendingOutcomeSlots"]), 1)
+        self.assertTrue(pd.isna(all_portfolio["MeanNetPnL"]))
+
+    def test_update_outcomes_completes_only_matured_horizons(self):
+        dates = pd.to_datetime(["2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08"])
+        stock = pd.DataFrame(
+            {"Open": [100.0, 101.0, 102.0, 103.0], "Close": [100.0, 102.0, 103.0, 104.0]},
+            index=dates,
+        )
+        spy = pd.DataFrame(
+            {"Open": [500.0, 500.0, 501.0, 502.0], "Close": [500.0, 501.0, 502.0, 504.0]},
+            index=dates,
+        )
+        row = {
+            "SignalDate": "2026-01-05",
+            "Ticker": "ABC",
+            "YahooSymbol": "ABC",
+            "Direction": "Long",
+            "SignalClose": 100.0,
+            "SignalBarStatus": "pending",
+            "TrackingStatus": "pending",
+        }
+        for horizon in (1, 3, 5, 10):
+            row[f"OutcomeStatus_{horizon}d"] = "pending"
+            for col in [
+                f"ExitDate_{horizon}d", f"ExitPrice_{horizon}d",
+                f"StockReturn_{horizon}d", f"SPYReturn_{horizon}d",
+                f"DirectionalGrossPnL_{horizon}d", f"DirectionalExcessVsSPY_{horizon}d",
+                f"NetBase_{horizon}d", f"NetStress_{horizon}d",
+            ]:
+                row[col] = np.nan
+        ledger, counts = update_outcomes(pd.DataFrame([row]), {"ABC": stock}, spy)
+        self.assertEqual(ledger.iloc[0]["SignalBarStatus"], "valid")
+        self.assertEqual(ledger.iloc[0]["OutcomeStatus_1d"], "complete")
+        self.assertEqual(ledger.iloc[0]["OutcomeStatus_3d"], "complete")
+        self.assertEqual(ledger.iloc[0]["OutcomeStatus_5d"], "pending")
+        self.assertEqual(ledger.iloc[0]["OutcomeStatus_10d"], "pending")
+        self.assertEqual(ledger.iloc[0]["EntryDate"], "2026-01-06")
+        self.assertEqual(ledger.iloc[0]["ExitDate_3d"], "2026-01-08")
+        self.assertEqual(counts["complete"], 2)
+
+    def test_update_outcomes_flags_missing_expected_bar_instead_of_shifting(self):
+        all_dates = pd.to_datetime(["2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08"])
+        stock_dates = pd.to_datetime(["2026-01-05", "2026-01-07", "2026-01-08"])
+        stock = pd.DataFrame(
+            {"Open": [100.0, 102.0, 103.0], "Close": [100.0, 103.0, 104.0]},
+            index=stock_dates,
+        )
+        spy = pd.DataFrame(
+            {"Open": [500.0, 500.0, 501.0, 502.0], "Close": [500.0, 501.0, 502.0, 504.0]},
+            index=all_dates,
+        )
+        row = {
+            "SignalDate": "2026-01-05", "Ticker": "ABC", "YahooSymbol": "ABC",
+            "Direction": "Long", "SignalClose": 100.0, "SignalBarStatus": "valid",
+            "TrackingStatus": "tracking",
+        }
+        for horizon in (1, 3, 5, 10):
+            row[f"OutcomeStatus_{horizon}d"] = "pending"
+        ledger, counts = update_outcomes(pd.DataFrame([row]), {"ABC": stock}, spy)
+        self.assertEqual(ledger.iloc[0]["OutcomeStatus_1d"], "invalid_missing_stock_bar")
+        self.assertEqual(ledger.iloc[0]["OutcomeStatus_3d"], "invalid_missing_stock_bar")
+        self.assertEqual(ledger.iloc[0]["EntryDate"] if "EntryDate" in ledger.columns else "", "")
+        self.assertGreaterEqual(counts["invalid"], 0)
+
+    def test_pending_portfolio_is_counted_but_not_scored(self):
+        ledger = pd.DataFrame([{
+            "SignalDate": "2026-01-05", "Ticker": "AAA", "Direction": "Long",
+            "SetupScore": 90, "QCFlagged": False, "QCUnusualVolume": False,
+            "SignalBarStatus": "valid", "OutcomeStatus_1d": "pending",
+            "OutcomeStatus_3d": "pending", "OutcomeStatus_5d": "pending", "OutcomeStatus_10d": "pending",
+            "DirectionalGrossPnL_1d": np.nan, "DirectionalExcessVsSPY_1d": np.nan,
+            "NetBase_1d": np.nan, "NetStress_1d": np.nan,
+        }])
+        daily = make_daily_portfolios(ledger)
+        summary = summarize_daily_portfolios(daily)
+        all_row = summary[
+            (summary["QCGroup"] == "All")
+            & (summary["TopK"] == 10)
+            & (summary["Horizon"] == 1)
+            & (summary["CostScenario"] == "Base")
+        ].iloc[0]
+        self.assertEqual(int(all_row["SignalDates"]), 1)
+        self.assertEqual(int(all_row["PendingDates"]), 1)
+        self.assertEqual(int(all_row["ScorableDates"]), 0)
+        self.assertTrue(pd.isna(all_row["MeanDailyNetPnL"]))
 
     def test_qc_flags_are_preserved_as_group_labels(self):
         result = quality_flags({

@@ -14,6 +14,8 @@ from scanner.universe import fetch_us_universe
 
 HORIZONS = (1, 3, 5, 10)
 TOP_KS = (10, 40)
+MIN_DECISION_DATES = 200
+BOOTSTRAP_BLOCK_SESSIONS = 10
 COSTS = {
     "Base": {"round_trip_cost_bps": 10.0, "annual_short_borrow_rate": 0.03},
     "Stress": {"round_trip_cost_bps": 25.0, "annual_short_borrow_rate": 0.10},
@@ -445,11 +447,12 @@ def make_daily_portfolios(ledger: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def block_bootstrap_ci(values, reps=2500, block=5, seed=42):
+def block_bootstrap_ci(values, reps=2500, block=BOOTSTRAP_BLOCK_SESSIONS, seed=42):
     x = np.asarray(values, dtype=float)
     x = x[np.isfinite(x)]
     n = len(x)
-    if n < 10:
+    # A block bootstrap needs at least two full-length blocks to avoid a degenerate CI.
+    if n < 2 * block:
         return np.nan, np.nan, np.nan
     rng = np.random.default_rng(seed)
     estimates = np.empty(reps)
@@ -486,7 +489,7 @@ def summarize_daily_portfolios(daily: pd.DataFrame) -> pd.DataFrame:
             "NetCI95High": hi,
             "NetPositiveDatePct": float((scoreable["MeanNetPnL"] > 0).mean()) if not scoreable.empty else np.nan,
             "MeanSlotCoverage": float(scoreable["SlotCoverage"].mean()) if not scoreable.empty else np.nan,
-            "CIStatus": "available" if np.isfinite(lo) else "need >=10 scorable signal dates",
+            "CIStatus": "available" if np.isfinite(lo) else f"need >= {2 * BOOTSTRAP_BLOCK_SESSIONS} scorable dates for block CI",
         })
     return pd.DataFrame(rows)
 
@@ -530,9 +533,80 @@ def compare_group_to_all(daily: pd.DataFrame) -> pd.DataFrame:
                         "DiffCI95Low": lo,
                         "DiffCI95High": hi,
                         "DifferencePositiveSupported": bool(np.isfinite(lo) and lo > 0),
-                        "CIStatus": "available" if np.isfinite(lo) else "need >=10 paired scorable dates",
+                        "CIStatus": "available" if np.isfinite(lo) else f"need >= {2 * BOOTSTRAP_BLOCK_SESSIONS} paired scorable dates for block CI",
                     })
     return pd.DataFrame(rows)
+
+
+def apply_evidence_gates(summary: pd.DataFrame, comparisons: pd.DataFrame):
+    """Attach pre-declared, conservative evidence gates; never enables production."""
+    summary = summary.copy()
+    comparisons = comparisons.copy()
+
+    if not summary.empty:
+        summary["MinimumDecisionDates"] = MIN_DECISION_DATES
+        summary["DecisionStatus"] = "Collecting; minimum date count not met"
+        keys = ["Direction", "QCGroup", "TopK", "Horizon"]
+        for key, group in summary.groupby(keys, sort=False):
+            row_indices = group.index
+            scenarios = {str(row["CostScenario"]): row for _, row in group.iterrows()}
+            minimum_dates = min(
+                [int(pd.to_numeric(row.get("ScorableDates", 0), errors="coerce") or 0) for row in scenarios.values()]
+                or [0]
+            )
+            if minimum_dates < MIN_DECISION_DATES:
+                status = f"Collecting; need {MIN_DECISION_DATES} scorable dates under both cost cases"
+            else:
+                robust_positive = True
+                for scenario in ("Base", "Stress"):
+                    row = scenarios.get(scenario)
+                    if row is None:
+                        robust_positive = False
+                        break
+                    mean = pd.to_numeric(pd.Series([row.get("MeanDailyNetPnL")]), errors="coerce").iloc[0]
+                    low = pd.to_numeric(pd.Series([row.get("NetCI95Low")]), errors="coerce").iloc[0]
+                    if not (pd.notna(mean) and pd.notna(low) and mean > 0 and low > 0):
+                        robust_positive = False
+                        break
+                status = (
+                    "Positive under both cost cases; still research-only and requires independent replication"
+                    if robust_positive
+                    else "No confirmed positive net edge under both cost cases"
+                )
+            summary.loc[row_indices, "DecisionStatus"] = status
+
+    if not comparisons.empty:
+        comparisons["MinimumPairedDates"] = MIN_DECISION_DATES
+        comparisons["FilterEvidenceStatus"] = "Collecting; minimum paired-date count not met"
+        keys = ["Direction", "Horizon", "Comparison"]
+        for key, group in comparisons.groupby(keys, sort=False):
+            row_indices = group.index
+            scenarios = {str(row["CostScenario"]): row for _, row in group.iterrows()}
+            minimum_dates = min(
+                [int(pd.to_numeric(row.get("PairedSignalDates", 0), errors="coerce") or 0) for row in scenarios.values()]
+                or [0]
+            )
+            if minimum_dates < MIN_DECISION_DATES:
+                status = f"Collecting; need {MIN_DECISION_DATES} paired dates under both cost cases"
+            else:
+                robust_difference = True
+                for scenario in ("Base", "Stress"):
+                    row = scenarios.get(scenario)
+                    if row is None:
+                        robust_difference = False
+                        break
+                    low = pd.to_numeric(pd.Series([row.get("DiffCI95Low")]), errors="coerce").iloc[0]
+                    if not (pd.notna(low) and low > 0):
+                        robust_difference = False
+                        break
+                status = (
+                    "Positive difference under both cost cases; still research-only"
+                    if robust_difference
+                    else "QC-group difference not established under both cost cases"
+                )
+            comparisons.loc[row_indices, "FilterEvidenceStatus"] = status
+
+    return summary, comparisons
 
 
 def main():
@@ -598,6 +672,7 @@ def main():
     daily = make_daily_portfolios(ledger)
     summary = summarize_daily_portfolios(daily)
     comparisons = compare_group_to_all(daily)
+    summary, comparisons = apply_evidence_gates(summary, comparisons)
 
     if not ledger.empty:
         ledger = ledger.sort_values(["SignalDate", "Direction", "SignalRank", "Ticker"], ascending=[True, True, True, True])
@@ -662,6 +737,9 @@ def main():
         "portfolio_return_convention": "Returns are normalized by target slots; unused slots are cash at 0%. Portfolios are selected from the full valid signal cohort before checking outcome maturity. Any terminal missing/invalid outcome in selected slots makes that portfolio-date unscorable rather than substituting lower-ranked names.",
         "group_summary_rows": int(len(summary)),
         "comparison_rows": int(len(comparisons)),
+        "minimum_signal_dates_for_decision": MIN_DECISION_DATES,
+        "bootstrap_block_sessions": BOOTSTRAP_BLOCK_SESSIONS,
+        "decision_gate": "For a strategy group, require >=200 scorable signal dates and a positive mean net return with the 95% 10-session block-bootstrap CI entirely above zero under both Base and Stress costs. QC-filter improvement requires >=200 paired scorable dates and the paired-difference CI lower bound above zero under both cost cases. Passing this gate is still not approval to trade.",
         "thresholds_or_scores_changed": False,
         "limitations": [
             "This is prospective shadow tracking, not a live strategy or recommendation.",

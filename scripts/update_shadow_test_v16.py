@@ -481,51 +481,6 @@ def compare_group_to_all(daily: pd.DataFrame) -> pd.DataFrame:
                         & (primary["CostScenario"] == scenario)
                         & (primary["QCGroup"] == group)
                     ][["SignalDate", "MeanNetPnL"]].rename(columns={"MeanNetPnL": "GroupNet"})
-                    # Compare on every date where the all-candidate portfolio matured.
-                    # If the filtered group had no eligible positions, it is cash (0 return).
-                    paired = base.merge(part, on="SignalDate", how="left")
-                    paired["GroupNet"] = pd.to_numeric(paired["GroupNet"], errors="coerce").fillna(0.0)
-                    differences = paired["GroupNet"] - paired["AllNet"]
-                    diff, lo, hi = block_bootstrap_ci(
-                        differences,
-                        seed=500 + horizon + (0 if direction == "Long" else 10)
-                        + (100 if scenario == "Stress" else 0)
-                        + (1000 if group == "QC Flagged" else 0),
-                    )
-                    rows.append({
-                        "Direction": direction,
-                        "CostScenario": scenario,
-                        "Horizon": horizon,
-                        "Comparison": f"{group} minus All",
-                        "PairedSignalDates": int(len(paired)),
-                        "MeanNetPnLDifference": float(differences.mean()) if len(paired) else np.nan,
-                        "DiffCI95Low": lo,
-                        "DiffCI95High": hi,
-                        "DifferencePositiveSupported": bool(np.isfinite(lo) and lo > 0),
-                        "CIStatus": "available" if np.isfinite(lo) else "need >=10 paired signal dates",
-                    })
-    return pd.DataFrame(rows)
-
-
-def compare_group_to_all(daily: pd.DataFrame) -> pd.DataFrame:
-    rows = []
-    if daily.empty:
-        return pd.DataFrame()
-    for horizon in HORIZONS:
-        primary = daily[(daily["Horizon"] == horizon) & (daily["TopK"] == 10)]
-        for direction in ("Long", "Short"):
-            for scenario in COSTS:
-                base = primary[
-                    (primary["Direction"] == direction)
-                    & (primary["CostScenario"] == scenario)
-                    & (primary["QCGroup"] == "All")
-                ][["SignalDate", "MeanNetPnL"]].rename(columns={"MeanNetPnL": "AllNet"})
-                for group in ("QC Clear", "QC Flagged"):
-                    part = primary[
-                        (primary["Direction"] == direction)
-                        & (primary["CostScenario"] == scenario)
-                        & (primary["QCGroup"] == group)
-                    ][["SignalDate", "MeanNetPnL"]].rename(columns={"MeanNetPnL": "GroupNet"})
                     paired = base.merge(part, on="SignalDate", how="left")
                     # Missing rows are not assumed to be cash; only explicit no_candidates rows have 0.
                     paired = paired.dropna(subset=["AllNet", "GroupNet"])

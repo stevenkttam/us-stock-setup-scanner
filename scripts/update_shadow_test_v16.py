@@ -353,6 +353,7 @@ def make_daily_portfolios(ledger: pd.DataFrame) -> pd.DataFrame:
                                 "TargetSlots": int(top_k),
                                 "SlotCoverage": 0.0,
                                 "SelectedSignals": 0,
+                                "PendingOutcomeSlots": 0,
                                 "MissingOutcomeSlots": 0,
                                 "PortfolioStatus": "no_candidates",
                                 "MeanDirectionalGrossPnL": 0.0,
@@ -365,8 +366,33 @@ def make_daily_portfolios(ledger: pd.DataFrame) -> pd.DataFrame:
                         continue
 
                     statuses = selected[status_col].fillna("pending").astype(str)
-                    if statuses.isin(["", "nan", "None", "pending"]).any():
-                        # Do not score a portfolio until every originally selected signal matures.
+                    pending_mask = statuses.isin(["", "nan", "None", "pending"])
+                    if pending_mask.any():
+                        # Explicitly log pending portfolios so the dashboard can show data maturity.
+                        # Pending rows have NaN returns and are excluded from performance estimates.
+                        pending_count = int(pending_mask.sum())
+                        for cost_case in COSTS:
+                            rows.append({
+                                "SignalDate": date_text(signal_date),
+                                "Direction": direction,
+                                "QCGroup": group_name,
+                                "TopK": top_k,
+                                "Horizon": horizon,
+                                "CostScenario": cost_case,
+                                "NTrades": 0,
+                                "TargetSlots": int(top_k),
+                                "SlotCoverage": np.nan,
+                                "SelectedSignals": int(len(selected)),
+                                "PendingOutcomeSlots": pending_count,
+                                "MissingOutcomeSlots": 0,
+                                "PortfolioStatus": "pending_outcomes",
+                                "MeanDirectionalGrossPnL": np.nan,
+                                "MeanDirectionalExcessVsSPY": np.nan,
+                                "MeanNetPnL": np.nan,
+                                "MeanNetPnLPerTrade": np.nan,
+                                "GrossHitRate": np.nan,
+                                "NetHitRate": np.nan,
+                            })
                         continue
 
                     complete = statuses.eq("complete")
@@ -406,6 +432,7 @@ def make_daily_portfolios(ledger: pd.DataFrame) -> pd.DataFrame:
                             "TargetSlots": int(top_k),
                             "SlotCoverage": float(ntrades / top_k) if is_scorable else np.nan,
                             "SelectedSignals": int(len(selected)),
+                            "PendingOutcomeSlots": 0,
                             "MissingOutcomeSlots": missing_count,
                             "PortfolioStatus": portfolio_status,
                             "MeanDirectionalGrossPnL": gross_portfolio,
@@ -447,6 +474,8 @@ def summarize_daily_portfolios(daily: pd.DataFrame) -> pd.DataFrame:
             "SignalDates": int(g["SignalDate"].nunique()),
             "ScorableDates": int(scoreable["SignalDate"].nunique()),
             "UnscorableDates": int(g.loc[g["PortfolioStatus"] == "unscorable_missing_outcome", "SignalDate"].nunique()),
+            "PendingDates": int(g.loc[g["PortfolioStatus"] == "pending_outcomes", "SignalDate"].nunique()),
+            "PendingOutcomeSlots": int(g["PendingOutcomeSlots"].sum()),
             "MissingOutcomeSlots": int(g["MissingOutcomeSlots"].sum()),
             "TotalTrades": int(g["NTrades"].sum()),
             "MeanDailyGrossPnL": float(scoreable["MeanDirectionalGrossPnL"].mean()) if not scoreable.empty else np.nan,

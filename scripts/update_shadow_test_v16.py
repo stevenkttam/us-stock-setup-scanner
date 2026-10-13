@@ -315,10 +315,12 @@ def make_daily_portfolios(ledger: pd.DataFrame) -> pd.DataFrame:
     data = ledger.copy()
     data["SignalDate"] = pd.to_datetime(data["SignalDate"], errors="coerce")
     data["SignalRank"] = pd.to_numeric(data["SignalRank"], errors="coerce")
+    data["SetupScore"] = pd.to_numeric(data["SetupScore"], errors="coerce")
     data["QCFlagged"] = data["QCFlagged"].fillna(False).astype(bool)
     data["QCUnusualVolume"] = data["QCUnusualVolume"].fillna(False).astype(bool)
 
-    # Rebuild each completed signal-date portfolio by its frozen historical rank.
+    # Build each portfolio from matured, valid events. Returns are normalized by
+    # target slots so unused slots are cash with 0% return, not silently omitted.
     for horizon in HORIZONS:
         status_col = f"OutcomeStatus_{horizon}d"
         eligible = data[(data[status_col] == "complete") & (data["SignalBarStatus"] == "valid")].copy()
@@ -335,15 +337,28 @@ def make_daily_portfolios(ledger: pd.DataFrame) -> pd.DataFrame:
                 "Unusual Volume": g[g["QCUnusualVolume"]],
             }
             for group_name, subset in groups.items():
+                # All cohorts are re-ranked internally by the frozen signal score.
+                ranked_subset = subset.sort_values(["SetupScore", "Ticker"], ascending=[False, True], na_position="last")
                 for top_k in TOP_KS:
-                    selected = subset.sort_values(["SignalRank", "SetupScore"], ascending=[True, False]).head(top_k)
-                    if selected.empty:
-                        continue
-                    for cost_case in COSTS:
-                        net_col = f"Net{cost_case}_{horizon}d"
-                        gross = pd.to_numeric(selected[gross_col], errors="coerce").dropna()
-                        net = pd.to_numeric(selected[net_col], errors="coerce").dropna()
-                        excess = pd.to_numeric(selected[excess_col], errors="coerce").dropna()
+                    selected = ranked_subset.head(top_k)
+                    gross_raw = pd.to_numeric(selected[gross_col], errors="coerce")
+                    net_raw_by_case = {
+                        cost_case: pd.to_numeric(selected[f"Net{cost_case}_{horizon}d"], errors="coerce")
+                        for cost_case in COSTS
+                    }
+                    excess_raw = pd.to_numeric(selected[excess_col], errors="coerce")
+                    valid = gross_raw.notna() & excess_raw.notna()
+                    for series in net_raw_by_case.values():
+                        valid &= series.notna()
+
+                    gross = gross_raw[valid]
+                    excess = excess_raw[valid]
+                    ntrades = int(valid.sum())
+                    gross_portfolio = float(gross.sum() / top_k) if ntrades else 0.0
+                    excess_portfolio = float(excess.sum() / top_k) if ntrades else 0.0
+                    for cost_case, net_raw in net_raw_by_case.items():
+                        net = net_raw[valid]
+                        net_portfolio = float(net.sum() / top_k) if ntrades else 0.0
                         rows.append({
                             "SignalDate": date_text(signal_date),
                             "Direction": direction,
@@ -351,14 +366,15 @@ def make_daily_portfolios(ledger: pd.DataFrame) -> pd.DataFrame:
                             "TopK": top_k,
                             "Horizon": horizon,
                             "CostScenario": cost_case,
-                            "NTrades": int(len(net)),
+                            "NTrades": ntrades,
                             "TargetSlots": int(top_k),
-                            "SlotCoverage": float(len(net) / top_k),
-                            "MeanDirectionalGrossPnL": float(gross.mean()),
-                            "MeanDirectionalExcessVsSPY": float(excess.mean()),
-                            "MeanNetPnL": float(net.mean()),
-                            "GrossHitRate": float((gross > 0).mean()),
-                            "NetHitRate": float((net > 0).mean()),
+                            "SlotCoverage": float(ntrades / top_k),
+                            "MeanDirectionalGrossPnL": gross_portfolio,
+                            "MeanDirectionalExcessVsSPY": excess_portfolio,
+                            "MeanNetPnL": net_portfolio,
+                            "MeanNetPnLPerTrade": float(net.mean()) if ntrades else np.nan,
+                            "GrossHitRate": float((gross > 0).mean()) if ntrades else np.nan,
+                            "NetHitRate": float((net > 0).mean()) if ntrades else np.nan,
                         })
     return pd.DataFrame(rows)
 
@@ -410,21 +426,38 @@ def compare_group_to_all(daily: pd.DataFrame) -> pd.DataFrame:
         primary = daily[(daily["Horizon"] == horizon) & (daily["TopK"] == 10)]
         for direction in ("Long", "Short"):
             for scenario in COSTS:
-                base = primary[(primary["Direction"] == direction) & (primary["CostScenario"] == scenario) & (primary["QCGroup"] == "All")][["SignalDate", "MeanNetPnL"]].rename(columns={"MeanNetPnL": "AllNet"})
+                base = primary[
+                    (primary["Direction"] == direction)
+                    & (primary["CostScenario"] == scenario)
+                    & (primary["QCGroup"] == "All")
+                ][["SignalDate", "MeanNetPnL"]].rename(columns={"MeanNetPnL": "AllNet"})
                 for group in ("QC Clear", "QC Flagged"):
-                    part = primary[(primary["Direction"] == direction) & (primary["CostScenario"] == scenario) & (primary["QCGroup"] == group)][["SignalDate", "MeanNetPnL"]].rename(columns={"MeanNetPnL": "GroupNet"})
-                    paired = base.merge(part, on="SignalDate", how="inner")
-                    diff, lo, hi = block_bootstrap_ci(paired["GroupNet"] - paired["AllNet"], seed=500 + horizon + (0 if direction == "Long" else 10) + (100 if scenario == "Stress" else 0) + (1000 if group == "QC Flagged" else 0))
+                    part = primary[
+                        (primary["Direction"] == direction)
+                        & (primary["CostScenario"] == scenario)
+                        & (primary["QCGroup"] == group)
+                    ][["SignalDate", "MeanNetPnL"]].rename(columns={"MeanNetPnL": "GroupNet"})
+                    # Compare on every date where the all-candidate portfolio matured.
+                    # If the filtered group had no eligible positions, it is cash (0 return).
+                    paired = base.merge(part, on="SignalDate", how="left")
+                    paired["GroupNet"] = pd.to_numeric(paired["GroupNet"], errors="coerce").fillna(0.0)
+                    differences = paired["GroupNet"] - paired["AllNet"]
+                    diff, lo, hi = block_bootstrap_ci(
+                        differences,
+                        seed=500 + horizon + (0 if direction == "Long" else 10)
+                        + (100 if scenario == "Stress" else 0)
+                        + (1000 if group == "QC Flagged" else 0),
+                    )
                     rows.append({
                         "Direction": direction,
                         "CostScenario": scenario,
                         "Horizon": horizon,
                         "Comparison": f"{group} minus All",
                         "PairedSignalDates": int(len(paired)),
-                        "MeanNetPnLDifference": float((paired["GroupNet"] - paired["AllNet"]).mean()) if len(paired) else np.nan,
+                        "MeanNetPnLDifference": float(differences.mean()) if len(paired) else np.nan,
                         "DiffCI95Low": lo,
                         "DiffCI95High": hi,
-                        "ImprovementSupported": bool(np.isfinite(lo) and lo > 0),
+                        "DifferencePositiveSupported": bool(np.isfinite(lo) and lo > 0),
                         "CIStatus": "available" if np.isfinite(lo) else "need >=10 paired signal dates",
                     })
     return pd.DataFrame(rows)

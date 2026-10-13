@@ -5,6 +5,8 @@ import pandas as pd
 
 from scripts.update_shadow_test_v16 import (
     add_new_signal_rows,
+    apply_evidence_gates,
+    block_bootstrap_ci,
     calculate_outcome,
     date_text,
     horizon_dates,
@@ -284,6 +286,54 @@ class ShadowTrackerTests(unittest.TestCase):
         self.assertEqual(int(all_row["PendingDates"]), 1)
         self.assertEqual(int(all_row["ScorableDates"]), 0)
         self.assertTrue(pd.isna(all_row["MeanDailyNetPnL"]))
+
+    def test_block_bootstrap_requires_two_full_blocks(self):
+        mean_small, low_small, high_small = block_bootstrap_ci(np.linspace(-0.02, 0.02, 19))
+        self.assertTrue(np.isnan(mean_small))
+        self.assertTrue(np.isnan(low_small))
+        self.assertTrue(np.isnan(high_small))
+
+        mean_ok, low_ok, high_ok = block_bootstrap_ci(np.linspace(-0.02, 0.04, 40), reps=200)
+        self.assertTrue(np.isfinite(mean_ok))
+        self.assertTrue(np.isfinite(low_ok))
+        self.assertTrue(np.isfinite(high_ok))
+
+    def test_evidence_gate_requires_200_dates_and_both_cost_cases(self):
+        summary = pd.DataFrame([
+            {
+                "Direction": "Long", "QCGroup": "All", "TopK": 10, "Horizon": 5,
+                "CostScenario": scenario, "ScorableDates": 199,
+                "MeanDailyNetPnL": 0.01, "NetCI95Low": 0.001,
+            }
+            for scenario in ("Base", "Stress")
+        ])
+        comparisons = pd.DataFrame([
+            {
+                "Direction": "Long", "Horizon": 5, "Comparison": "QC Clear minus All",
+                "CostScenario": scenario, "PairedSignalDates": 200, "DiffCI95Low": 0.001,
+            }
+            for scenario in ("Base", "Stress")
+        ])
+        gated_summary, gated_comparisons = apply_evidence_gates(summary, comparisons)
+        self.assertIn("need 200 scorable dates", gated_summary.iloc[0]["DecisionStatus"])
+        self.assertIn("Positive difference under both cost cases", gated_comparisons.iloc[0]["FilterEvidenceStatus"])
+
+    def test_evidence_gate_requires_positive_ci_under_both_cost_cases(self):
+        summary = pd.DataFrame([
+            {
+                "Direction": "Short", "QCGroup": "All", "TopK": 10, "Horizon": 5,
+                "CostScenario": "Base", "ScorableDates": 220,
+                "MeanDailyNetPnL": 0.01, "NetCI95Low": 0.002,
+            },
+            {
+                "Direction": "Short", "QCGroup": "All", "TopK": 10, "Horizon": 5,
+                "CostScenario": "Stress", "ScorableDates": 220,
+                "MeanDailyNetPnL": 0.001, "NetCI95Low": -0.001,
+            },
+        ])
+        gated_summary, _ = apply_evidence_gates(summary, pd.DataFrame())
+        self.assertEqual(gated_summary.iloc[0]["DecisionStatus"], "No confirmed positive net edge under both cost cases")
+        self.assertEqual(gated_summary.iloc[1]["DecisionStatus"], "No confirmed positive net edge under both cost cases")
 
     def test_qc_flags_are_preserved_as_group_labels(self):
         result = quality_flags({

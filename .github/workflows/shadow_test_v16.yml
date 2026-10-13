@@ -91,6 +91,7 @@ jobs:
           path: |
             artifacts/shadow_test_status.json
             artifacts/shadow_test_v16/status.json
+            artifacts/shadow_test_v16/report.md
             data/shadow/shadow_daily_portfolios.csv
             data/shadow/shadow_group_summary.csv
             data/shadow/shadow_qc_comparisons.csv

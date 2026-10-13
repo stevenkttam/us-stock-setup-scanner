@@ -540,6 +540,10 @@ def compare_group_to_all(daily: pd.DataFrame) -> pd.DataFrame:
 
 def apply_evidence_gates(summary: pd.DataFrame, comparisons: pd.DataFrame):
     """Attach pre-declared, conservative evidence gates; never enables production."""
+    def safe_int(value) -> int:
+        number = pd.to_numeric(pd.Series([value]), errors="coerce").iloc[0]
+        return int(number) if pd.notna(number) else 0
+
     summary = summary.copy()
     comparisons = comparisons.copy()
 
@@ -551,7 +555,7 @@ def apply_evidence_gates(summary: pd.DataFrame, comparisons: pd.DataFrame):
             row_indices = group.index
             scenarios = {str(row["CostScenario"]): row for _, row in group.iterrows()}
             minimum_dates = min(
-                [int(pd.to_numeric(row.get("ScorableDates", 0), errors="coerce") or 0) for row in scenarios.values()]
+                [safe_int(row.get("ScorableDates", 0)) for row in scenarios.values()]
                 or [0]
             )
             if minimum_dates < MIN_DECISION_DATES:
@@ -583,7 +587,7 @@ def apply_evidence_gates(summary: pd.DataFrame, comparisons: pd.DataFrame):
             row_indices = group.index
             scenarios = {str(row["CostScenario"]): row for _, row in group.iterrows()}
             minimum_dates = min(
-                [int(pd.to_numeric(row.get("PairedSignalDates", 0), errors="coerce") or 0) for row in scenarios.values()]
+                [safe_int(row.get("PairedSignalDates", 0)) for row in scenarios.values()]
                 or [0]
             )
             if minimum_dates < MIN_DECISION_DATES:

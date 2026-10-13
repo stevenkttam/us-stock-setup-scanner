@@ -253,8 +253,8 @@ else:
                 st.dataframe(
                     view[[
                         c for c in [
-                            "Direction", "QCGroup", "Horizon", "SignalDates", "ScorableDates", "UnscorableDates",
-                            "MissingOutcomeSlots", "TotalTrades", "MeanDailyNetPnL", "MeanNetPnLPerTrade", "NetCI95Low", "NetCI95High",
+                            "Direction", "QCGroup", "Horizon", "SignalDates", "ScorableDates", "PendingDates", "UnscorableDates",
+                            "PendingOutcomeSlots", "MissingOutcomeSlots", "TotalTrades", "MeanDailyNetPnL", "MeanNetPnLPerTrade", "NetCI95Low", "NetCI95High",
                             "NetPositiveDatePct", "MeanSlotCoverage", "CIStatus",
                         ] if c in view.columns
                     ]],
@@ -264,7 +264,9 @@ else:
                         "Horizon": st.column_config.NumberColumn("Holding sessions"),
                         "SignalDates": st.column_config.NumberColumn("Signal dates", format="%d"),
                         "ScorableDates": st.column_config.NumberColumn("Scorable dates", format="%d"),
+                        "PendingDates": st.column_config.NumberColumn("Pending dates", format="%d"),
                         "UnscorableDates": st.column_config.NumberColumn("Unscorable dates", format="%d"),
+                        "PendingOutcomeSlots": st.column_config.NumberColumn("Pending outcome slots", format="%d"),
                         "MissingOutcomeSlots": st.column_config.NumberColumn("Missing outcome slots", format="%d"),
                         "TotalTrades": st.column_config.NumberColumn("Completed events", format="%d"),
                         "MeanDailyNetPnL": st.column_config.NumberColumn("Portfolio net return / date", format="percent", help="Return is normalized to the target Top 10 slots; unused slots are treated as cash at 0% return."),

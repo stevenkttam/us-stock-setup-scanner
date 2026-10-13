@@ -162,6 +162,40 @@ class ShadowTrackerTests(unittest.TestCase):
         self.assertAlmostEqual(float(clear["MeanNetPnLPerTrade"]), 0.099, places=12)
         self.assertAlmostEqual(float(flagged["MeanNetPnL"]), -0.011 * 2 / 10, places=12)
 
+    def test_pending_high_ranked_signal_is_not_replaced_by_lower_rank(self):
+        ledger = pd.DataFrame([
+            {
+                "SignalDate": "2026-01-05",
+                "Ticker": ticker,
+                "Direction": "Long",
+                "SetupScore": score,
+                "QCFlagged": False,
+                "QCUnusualVolume": False,
+                "SignalBarStatus": "valid",
+                "OutcomeStatus_1d": status,
+                "OutcomeStatus_3d": "pending",
+                "OutcomeStatus_5d": "pending",
+                "OutcomeStatus_10d": "pending",
+                "DirectionalGrossPnL_1d": 0.05,
+                "DirectionalExcessVsSPY_1d": 0.04,
+                "NetBase_1d": 0.049,
+                "NetStress_1d": 0.0475,
+            }
+            for ticker, score, status in [
+                ("AAA", 90, "pending"),
+                ("BBB", 80, "complete"),
+                ("CCC", 70, "complete"),
+            ]
+        ])
+
+        daily = make_daily_portfolios(ledger)
+        all_portfolio = daily[
+            (daily["QCGroup"] == "All")
+            & (daily["TopK"] == 10)
+            & (daily["Horizon"] == 1)
+        ]
+        self.assertTrue(all_portfolio.empty)
+
     def test_qc_flags_are_preserved_as_group_labels(self):
         result = quality_flags({
             "QualityFlags": "EXTREME VOLUME ACCELERATION (>=10x prior day); COUNTERTREND VS SPY REGIME"

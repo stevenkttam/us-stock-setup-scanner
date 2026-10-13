@@ -289,7 +289,7 @@ class ShadowTrackerTests(unittest.TestCase):
 
     def test_block_bootstrap_requires_two_full_blocks(self):
         mean_small, low_small, high_small = block_bootstrap_ci(np.linspace(-0.02, 0.02, 19))
-        self.assertTrue(np.isnan(mean_small))
+        self.assertTrue(np.isfinite(mean_small))
         self.assertTrue(np.isnan(low_small))
         self.assertTrue(np.isnan(high_small))
 

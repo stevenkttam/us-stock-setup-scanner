@@ -409,6 +409,7 @@ def summarize_daily_portfolios(daily: pd.DataFrame) -> pd.DataFrame:
             "MeanDailyGrossPnL": float(g["MeanDirectionalGrossPnL"].mean()),
             "MeanDailyExcessVsSPY": float(g["MeanDirectionalExcessVsSPY"].mean()),
             "MeanDailyNetPnL": float(g["MeanNetPnL"].mean()),
+            "MeanNetPnLPerTrade": float(g["MeanNetPnLPerTrade"].mean()),
             "NetCI95Low": lo,
             "NetCI95High": hi,
             "NetPositiveDatePct": float((g["MeanNetPnL"] > 0).mean()),

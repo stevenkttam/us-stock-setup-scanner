@@ -314,21 +314,18 @@ def make_daily_portfolios(ledger: pd.DataFrame) -> pd.DataFrame:
         return pd.DataFrame()
     data = ledger.copy()
     data["SignalDate"] = pd.to_datetime(data["SignalDate"], errors="coerce")
-    data["SignalRank"] = pd.to_numeric(data["SignalRank"], errors="coerce")
     data["SetupScore"] = pd.to_numeric(data["SetupScore"], errors="coerce")
     data["QCFlagged"] = data["QCFlagged"].fillna(False).astype(bool)
     data["QCUnusualVolume"] = data["QCUnusualVolume"].fillna(False).astype(bool)
 
-    # Build each portfolio from matured, valid events. Returns are normalized by
-    # target slots so unused slots are cash with 0% return, not silently omitted.
+    # Rank using the full valid signal-date cohort first; never substitute a lower-ranked
+    # name just because a higher-ranked name has not produced a valid outcome yet.
+    signaled = data[data["SignalBarStatus"] == "valid"].copy()
     for horizon in HORIZONS:
         status_col = f"OutcomeStatus_{horizon}d"
-        eligible = data[(data[status_col] == "complete") & (data["SignalBarStatus"] == "valid")].copy()
-        if eligible.empty:
-            continue
         gross_col = f"DirectionalGrossPnL_{horizon}d"
         excess_col = f"DirectionalExcessVsSPY_{horizon}d"
-        for (signal_date, direction), g in eligible.groupby(["SignalDate", "Direction"], sort=True):
+        for (signal_date, direction), g in signaled.groupby(["SignalDate", "Direction"], sort=True):
             groups = {
                 "All": g,
                 "QC Clear": g[~g["QCFlagged"]],
@@ -337,28 +334,67 @@ def make_daily_portfolios(ledger: pd.DataFrame) -> pd.DataFrame:
                 "Unusual Volume": g[g["QCUnusualVolume"]],
             }
             for group_name, subset in groups.items():
-                # All cohorts are re-ranked internally by the frozen signal score.
-                ranked_subset = subset.sort_values(["SetupScore", "Ticker"], ascending=[False, True], na_position="last")
+                ranked_subset = subset.sort_values(
+                    ["SetupScore", "Ticker"], ascending=[False, True], na_position="last"
+                )
                 for top_k in TOP_KS:
-                    selected = ranked_subset.head(top_k)
-                    gross_raw = pd.to_numeric(selected[gross_col], errors="coerce")
+                    selected = ranked_subset.head(top_k).copy()
+                    if selected.empty:
+                        # An empty filtered portfolio is cash: 0 return and zero slot coverage.
+                        for cost_case in COSTS:
+                            rows.append({
+                                "SignalDate": date_text(signal_date),
+                                "Direction": direction,
+                                "QCGroup": group_name,
+                                "TopK": top_k,
+                                "Horizon": horizon,
+                                "CostScenario": cost_case,
+                                "NTrades": 0,
+                                "TargetSlots": int(top_k),
+                                "SlotCoverage": 0.0,
+                                "SelectedSignals": 0,
+                                "MissingOutcomeSlots": 0,
+                                "PortfolioStatus": "no_candidates",
+                                "MeanDirectionalGrossPnL": 0.0,
+                                "MeanDirectionalExcessVsSPY": 0.0,
+                                "MeanNetPnL": 0.0,
+                                "MeanNetPnLPerTrade": np.nan,
+                                "GrossHitRate": np.nan,
+                                "NetHitRate": np.nan,
+                            })
+                        continue
+
+                    statuses = selected[status_col].fillna("pending").astype(str)
+                    if statuses.isin(["", "nan", "None", "pending"]).any():
+                        # Do not score a portfolio until every originally selected signal matures.
+                        continue
+
+                    complete = statuses.eq("complete")
+                    missing_count = int((~complete).sum())
+                    completed_selected = selected.loc[complete].copy()
+                    gross = pd.to_numeric(completed_selected[gross_col], errors="coerce")
+                    excess = pd.to_numeric(completed_selected[excess_col], errors="coerce")
                     net_raw_by_case = {
-                        cost_case: pd.to_numeric(selected[f"Net{cost_case}_{horizon}d"], errors="coerce")
+                        cost_case: pd.to_numeric(
+                            completed_selected[f"Net{cost_case}_{horizon}d"], errors="coerce"
+                        )
                         for cost_case in COSTS
                     }
-                    excess_raw = pd.to_numeric(selected[excess_col], errors="coerce")
-                    valid = gross_raw.notna() & excess_raw.notna()
-                    for series in net_raw_by_case.values():
-                        valid &= series.notna()
-
-                    gross = gross_raw[valid]
-                    excess = excess_raw[valid]
-                    ntrades = int(valid.sum())
-                    gross_portfolio = float(gross.sum() / top_k) if ntrades else 0.0
-                    excess_portfolio = float(excess.sum() / top_k) if ntrades else 0.0
+                    all_returns_valid = (
+                        gross.notna().all()
+                        and excess.notna().all()
+                        and all(series.notna().all() for series in net_raw_by_case.values())
+                    )
+                    # A terminal data error is not treated as a zero-return cash position.
+                    # We mark the whole portfolio-date unscorable instead.
+                    is_scorable = missing_count == 0 and bool(all_returns_valid)
+                    portfolio_status = "complete" if is_scorable else "unscorable_missing_outcome"
+                    ntrades = int(len(completed_selected)) if is_scorable else 0
+                    gross_portfolio = float(gross.sum() / top_k) if is_scorable and ntrades else (0.0 if is_scorable else np.nan)
+                    excess_portfolio = float(excess.sum() / top_k) if is_scorable and ntrades else (0.0 if is_scorable else np.nan)
                     for cost_case, net_raw in net_raw_by_case.items():
-                        net = net_raw[valid]
-                        net_portfolio = float(net.sum() / top_k) if ntrades else 0.0
+                        net = net_raw
+                        net_portfolio = float(net.sum() / top_k) if is_scorable and ntrades else (0.0 if is_scorable else np.nan)
                         rows.append({
                             "SignalDate": date_text(signal_date),
                             "Direction": direction,
@@ -368,13 +404,16 @@ def make_daily_portfolios(ledger: pd.DataFrame) -> pd.DataFrame:
                             "CostScenario": cost_case,
                             "NTrades": ntrades,
                             "TargetSlots": int(top_k),
-                            "SlotCoverage": float(ntrades / top_k),
+                            "SlotCoverage": float(ntrades / top_k) if is_scorable else np.nan,
+                            "SelectedSignals": int(len(selected)),
+                            "MissingOutcomeSlots": missing_count,
+                            "PortfolioStatus": portfolio_status,
                             "MeanDirectionalGrossPnL": gross_portfolio,
                             "MeanDirectionalExcessVsSPY": excess_portfolio,
                             "MeanNetPnL": net_portfolio,
-                            "MeanNetPnLPerTrade": float(net.mean()) if ntrades else np.nan,
-                            "GrossHitRate": float((gross > 0).mean()) if ntrades else np.nan,
-                            "NetHitRate": float((net > 0).mean()) if ntrades else np.nan,
+                            "MeanNetPnLPerTrade": float(net.mean()) if is_scorable and ntrades else np.nan,
+                            "GrossHitRate": float((gross > 0).mean()) if is_scorable and ntrades else np.nan,
+                            "NetHitRate": float((net > 0).mean()) if is_scorable and ntrades else np.nan,
                         })
     return pd.DataFrame(rows)
 
@@ -401,20 +440,24 @@ def summarize_daily_portfolios(daily: pd.DataFrame) -> pd.DataFrame:
         return pd.DataFrame()
     keys = ["Direction", "QCGroup", "TopK", "Horizon", "CostScenario"]
     for key, g in daily.groupby(keys, sort=True):
-        mean, lo, hi = block_bootstrap_ci(g["MeanNetPnL"], seed=100 + int(key[3]))
+        scoreable = g[pd.to_numeric(g["MeanNetPnL"], errors="coerce").notna()].copy()
+        mean, lo, hi = block_bootstrap_ci(scoreable["MeanNetPnL"], seed=100 + int(key[3]))
         rows.append({
             **dict(zip(keys, key)),
             "SignalDates": int(g["SignalDate"].nunique()),
+            "ScorableDates": int(scoreable["SignalDate"].nunique()),
+            "UnscorableDates": int(g.loc[g["PortfolioStatus"] == "unscorable_missing_outcome", "SignalDate"].nunique()),
+            "MissingOutcomeSlots": int(g["MissingOutcomeSlots"].sum()),
             "TotalTrades": int(g["NTrades"].sum()),
-            "MeanDailyGrossPnL": float(g["MeanDirectionalGrossPnL"].mean()),
-            "MeanDailyExcessVsSPY": float(g["MeanDirectionalExcessVsSPY"].mean()),
-            "MeanDailyNetPnL": float(g["MeanNetPnL"].mean()),
-            "MeanNetPnLPerTrade": float(g["MeanNetPnLPerTrade"].mean()),
+            "MeanDailyGrossPnL": float(scoreable["MeanDirectionalGrossPnL"].mean()) if not scoreable.empty else np.nan,
+            "MeanDailyExcessVsSPY": float(scoreable["MeanDirectionalExcessVsSPY"].mean()) if not scoreable.empty else np.nan,
+            "MeanDailyNetPnL": mean,
+            "MeanNetPnLPerTrade": float(scoreable["MeanNetPnLPerTrade"].mean()) if not scoreable.empty else np.nan,
             "NetCI95Low": lo,
             "NetCI95High": hi,
-            "NetPositiveDatePct": float((g["MeanNetPnL"] > 0).mean()),
-            "MeanSlotCoverage": float(g["SlotCoverage"].mean()),
-            "CIStatus": "available" if np.isfinite(lo) else "need >=10 signal dates",
+            "NetPositiveDatePct": float((scoreable["MeanNetPnL"] > 0).mean()) if not scoreable.empty else np.nan,
+            "MeanSlotCoverage": float(scoreable["SlotCoverage"].mean()) if not scoreable.empty else np.nan,
+            "CIStatus": "available" if np.isfinite(lo) else "need >=10 scorable signal dates",
         })
     return pd.DataFrame(rows)
 
@@ -460,6 +503,50 @@ def compare_group_to_all(daily: pd.DataFrame) -> pd.DataFrame:
                         "DiffCI95High": hi,
                         "DifferencePositiveSupported": bool(np.isfinite(lo) and lo > 0),
                         "CIStatus": "available" if np.isfinite(lo) else "need >=10 paired signal dates",
+                    })
+    return pd.DataFrame(rows)
+
+
+def compare_group_to_all(daily: pd.DataFrame) -> pd.DataFrame:
+    rows = []
+    if daily.empty:
+        return pd.DataFrame()
+    for horizon in HORIZONS:
+        primary = daily[(daily["Horizon"] == horizon) & (daily["TopK"] == 10)]
+        for direction in ("Long", "Short"):
+            for scenario in COSTS:
+                base = primary[
+                    (primary["Direction"] == direction)
+                    & (primary["CostScenario"] == scenario)
+                    & (primary["QCGroup"] == "All")
+                ][["SignalDate", "MeanNetPnL"]].rename(columns={"MeanNetPnL": "AllNet"})
+                for group in ("QC Clear", "QC Flagged"):
+                    part = primary[
+                        (primary["Direction"] == direction)
+                        & (primary["CostScenario"] == scenario)
+                        & (primary["QCGroup"] == group)
+                    ][["SignalDate", "MeanNetPnL"]].rename(columns={"MeanNetPnL": "GroupNet"})
+                    paired = base.merge(part, on="SignalDate", how="left")
+                    # Missing rows are not assumed to be cash; only explicit no_candidates rows have 0.
+                    paired = paired.dropna(subset=["AllNet", "GroupNet"])
+                    differences = paired["GroupNet"] - paired["AllNet"]
+                    diff, lo, hi = block_bootstrap_ci(
+                        differences,
+                        seed=500 + horizon + (0 if direction == "Long" else 10)
+                        + (100 if scenario == "Stress" else 0)
+                        + (1000 if group == "QC Flagged" else 0),
+                    )
+                    rows.append({
+                        "Direction": direction,
+                        "CostScenario": scenario,
+                        "Horizon": horizon,
+                        "Comparison": f"{group} minus All",
+                        "PairedSignalDates": int(len(paired)),
+                        "MeanNetPnLDifference": float(differences.mean()) if len(paired) else np.nan,
+                        "DiffCI95Low": lo,
+                        "DiffCI95High": hi,
+                        "DifferencePositiveSupported": bool(np.isfinite(lo) and lo > 0),
+                        "CIStatus": "available" if np.isfinite(lo) else "need >=10 paired scorable dates",
                     })
     return pd.DataFrame(rows)
 
@@ -558,6 +645,7 @@ def main():
         "latest_market_date": date_text(calendar[-1]),
         "cost_assumptions": COSTS,
         "execution_convention": "EOD signal; entry next SPY session open; exit close of the h-th session after the signal; all outcomes require exact stock bars on entry/exit dates and are benchmarked over the matched SPY window.",
+        "portfolio_return_convention": "Returns are normalized by target slots; unused slots are cash at 0%. Portfolios are selected from the full valid signal cohort before checking outcome maturity. Any terminal missing/invalid outcome in selected slots makes that portfolio-date unscorable rather than substituting lower-ranked names.",
         "group_summary_rows": int(len(summary)),
         "comparison_rows": int(len(comparisons)),
         "thresholds_or_scores_changed": False,

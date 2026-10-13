@@ -188,20 +188,25 @@ else:
 
         if not shadow_summary.empty:
             st.markdown("**Top 10 prospective portfolio results — base cost assumption**")
+            st.caption(
+                "The tracker freezes the selected candidate cohort before checking returns. Results stay pending until "
+                "the selected signals mature; a terminal missing-data issue makes that portfolio-date unscorable rather "
+                "than replacing the candidate. Unused portfolio slots are treated as cash at 0% return."
+            )
             view = shadow_summary[
                 (pd.to_numeric(shadow_summary.get("TopK"), errors="coerce") == 10)
                 & (shadow_summary.get("CostScenario", pd.Series(index=shadow_summary.index, dtype=str)) == "Base")
             ].copy()
             if not view.empty:
-                for col in ["MeanDailyGrossPnL", "MeanDailyExcessVsSPY", "MeanDailyNetPnL", "NetCI95Low", "NetCI95High", "NetPositiveDatePct", "MeanSlotCoverage"]:
+                for col in ["MeanDailyGrossPnL", "MeanDailyExcessVsSPY", "MeanDailyNetPnL", "MeanNetPnLPerTrade", "NetCI95Low", "NetCI95High", "NetPositiveDatePct", "MeanSlotCoverage"]:
                     if col in view.columns:
                         view[col] = pd.to_numeric(view[col], errors="coerce")
                 view = view.sort_values(["Horizon", "Direction", "QCGroup"])
                 st.dataframe(
                     view[[
                         c for c in [
-                            "Direction", "QCGroup", "Horizon", "SignalDates", "TotalTrades",
-                            "MeanDailyNetPnL", "MeanNetPnLPerTrade", "NetCI95Low", "NetCI95High",
+                            "Direction", "QCGroup", "Horizon", "SignalDates", "ScorableDates", "UnscorableDates",
+                            "MissingOutcomeSlots", "TotalTrades", "MeanDailyNetPnL", "MeanNetPnLPerTrade", "NetCI95Low", "NetCI95High",
                             "NetPositiveDatePct", "MeanSlotCoverage", "CIStatus",
                         ] if c in view.columns
                     ]],
@@ -210,6 +215,9 @@ else:
                     column_config={
                         "Horizon": st.column_config.NumberColumn("Holding sessions"),
                         "SignalDates": st.column_config.NumberColumn("Signal dates", format="%d"),
+                        "ScorableDates": st.column_config.NumberColumn("Scorable dates", format="%d"),
+                        "UnscorableDates": st.column_config.NumberColumn("Unscorable dates", format="%d"),
+                        "MissingOutcomeSlots": st.column_config.NumberColumn("Missing outcome slots", format="%d"),
                         "TotalTrades": st.column_config.NumberColumn("Completed events", format="%d"),
                         "MeanDailyNetPnL": st.column_config.NumberColumn("Portfolio net return / date", format="percent", help="Return is normalized to the target Top 10 slots; unused slots are treated as cash at 0% return."),
                         "MeanNetPnLPerTrade": st.column_config.NumberColumn("Mean net per filled trade", format="percent"),

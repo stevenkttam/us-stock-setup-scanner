@@ -616,6 +616,129 @@ def apply_evidence_gates(summary: pd.DataFrame, comparisons: pd.DataFrame):
     return summary, comparisons
 
 
+def fmt_pct(value) -> str:
+    number = pd.to_numeric(pd.Series([value]), errors="coerce").iloc[0]
+    return f"{number:.2%}" if pd.notna(number) else "—"
+
+
+def write_human_report(status: dict, summary: pd.DataFrame, comparisons: pd.DataFrame, report_path: Path):
+    lines = [
+        "# V16 Prospective QC Shadow Test",
+        "",
+        f"- Status: **{status.get('status', 'unknown')}**",
+        f"- Research only: **{status.get('research_only', True)}**",
+        f"- Latest market date: **{status.get('latest_market_date', '—')}**",
+        f"- Signal events: **{status.get('ledger_events', 0):,}** across **{status.get('unique_signal_dates', 0):,}** signal dates",
+        f"- Long / Short: **{status.get('long_events', 0):,} / {status.get('short_events', 0):,}**",
+        f"- New events added on this run: **{status.get('new_signals_added_this_run', 0):,}**",
+        "",
+        "## Outcome maturity",
+        "",
+        "| Holding horizon | Complete events | Pending events | Invalid/unusable events |",
+        "|---:|---:|---:|---:|",
+    ]
+    for horizon in HORIZONS:
+        lines.append(
+            f"| {horizon} sessions | {status.get(f'completed_{horizon}d_outcomes', 0):,} "
+            f"| {status.get(f'pending_{horizon}d_outcomes', 0):,} "
+            f"| {status.get(f'invalid_{horizon}d_outcomes', 0):,} |"
+        )
+
+    lines.extend([
+        "",
+        "## Primary portfolio view",
+        "",
+        "Top 10 candidates, 5-session horizon, Base cost assumption. Returns are normalized to 10 target slots; unused slots are treated as cash. Confidence intervals are withheld until there are at least 20 scorable signal dates.",
+        "",
+    ])
+    if summary.empty:
+        lines.append("No portfolio summary rows are available yet.")
+    else:
+        primary = summary[
+            (pd.to_numeric(summary["TopK"], errors="coerce") == 10)
+            & (pd.to_numeric(summary["Horizon"], errors="coerce") == 5)
+            & (summary["CostScenario"].astype(str) == "Base")
+        ].copy()
+        if primary.empty:
+            lines.append("No Top 10 / 5-session summary rows are available yet.")
+        else:
+            lines.extend([
+                "| Direction | QC group | Signal dates | Scorable | Pending | Unscorable | Mean net portfolio return/date | 95% CI | Evidence gate |",
+                "|---|---|---:|---:|---:|---:|---:|---|---|",
+            ])
+            for _, row in primary.sort_values(["Direction", "QCGroup"]).iterrows():
+                ci = (
+                    f"[{fmt_pct(row.get('NetCI95Low'))}, {fmt_pct(row.get('NetCI95High'))}]"
+                    if pd.notna(pd.to_numeric(pd.Series([row.get("NetCI95Low")]), errors="coerce").iloc[0])
+                    and pd.notna(pd.to_numeric(pd.Series([row.get("NetCI95High")]), errors="coerce").iloc[0])
+                    else "Not available yet"
+                )
+                lines.append(
+                    f"| {row.get('Direction', '—')} | {row.get('QCGroup', '—')} "
+                    f"| {int(row.get('SignalDates', 0)):,} | {int(row.get('ScorableDates', 0)):,} "
+                    f"| {int(row.get('PendingDates', 0)):,} | {int(row.get('UnscorableDates', 0)):,} "
+                    f"| {fmt_pct(row.get('MeanDailyNetPnL'))} | {ci} "
+                    f"| {row.get('DecisionStatus', row.get('CIStatus', '—'))} |"
+                )
+
+    lines.extend([
+        "",
+        "## QC filter comparison",
+        "",
+        "Top 10 QC group minus All. A positive value favors the QC group; for a QC-clear filter, the 95% paired-difference interval must be entirely above zero under both cost assumptions and there must be at least 200 paired dates.",
+        "",
+    ])
+    if comparisons.empty:
+        lines.append("No paired QC comparison rows are available yet.")
+    else:
+        primary_compare = comparisons[
+            (pd.to_numeric(comparisons["Horizon"], errors="coerce") == 5)
+            & (comparisons["CostScenario"].astype(str) == "Base")
+        ].copy()
+        if primary_compare.empty:
+            lines.append("No 5-session paired comparison rows are available yet.")
+        else:
+            lines.extend([
+                "| Direction | Comparison | Paired dates | Mean difference | 95% CI | Evidence gate |",
+                "|---|---|---:|---:|---|---|",
+            ])
+            for _, row in primary_compare.sort_values(["Direction", "Comparison"]).iterrows():
+                ci = (
+                    f"[{fmt_pct(row.get('DiffCI95Low'))}, {fmt_pct(row.get('DiffCI95High'))}]"
+                    if pd.notna(pd.to_numeric(pd.Series([row.get("DiffCI95Low")]), errors="coerce").iloc[0])
+                    and pd.notna(pd.to_numeric(pd.Series([row.get("DiffCI95High")]), errors="coerce").iloc[0])
+                    else "Not available yet"
+                )
+                lines.append(
+                    f"| {row.get('Direction', '—')} | {row.get('Comparison', '—')} "
+                    f"| {int(row.get('PairedSignalDates', 0)):,} "
+                    f"| {fmt_pct(row.get('MeanNetPnLDifference'))} | {ci} "
+                    f"| {row.get('FilterEvidenceStatus', row.get('CIStatus', '—'))} |"
+                )
+
+    lines.extend([
+        "",
+        "## Cost assumptions",
+        "",
+        "- Base: 10 bps round-trip; 3% annualized short borrow.",
+        "- Stress: 25 bps round-trip; 10% annualized short borrow.",
+        "- These are fixed sensitivity assumptions, not broker-specific costs or guaranteed execution prices.",
+        "",
+        "## Interpretation",
+        "",
+        "This is a prospective research-only shadow test. It does not submit orders, change ranking scores, establish calibrated probabilities, or approve a strategy for real-money trading. A promising result requires independent replication and further execution-cost review.",
+        "",
+        "## Detailed files",
+        "",
+        "- data/shadow/shadow_ledger.csv",
+        "- data/shadow/shadow_daily_portfolios.csv",
+        "- data/shadow/shadow_group_summary.csv",
+        "- data/shadow/shadow_qc_comparisons.csv",
+        "",
+    ])
+    report_path.write_text("\n".join(lines), encoding="utf-8")
+
+
 def main():
     data_dir = ROOT / "data"
     data_dir.mkdir(parents=True, exist_ok=True)
@@ -628,6 +751,7 @@ def main():
     summary_path = LEDGER_DIR / "shadow_group_summary.csv"
     comparisons_path = LEDGER_DIR / "shadow_qc_comparisons.csv"
     status_path = ROOT / "artifacts" / "shadow_test_status.json"
+    report_path = out_dir / "report.md"
 
     ledger = pd.read_csv(ledger_path) if ledger_path.exists() else pd.DataFrame()
     current = pd.read_parquet(data_dir / "latest_scan.parquet") if (data_dir / "latest_scan.parquet").exists() else pd.DataFrame()
@@ -760,9 +884,11 @@ def main():
             "data/shadow/shadow_ledger.csv",
             "data/shadow/shadow_daily_portfolios.csv",
             "data/shadow/shadow_group_summary.csv",
-            "data/shadow/shadow_qc_comparisons.csv"
+            "data/shadow/shadow_qc_comparisons.csv",
+            "artifacts/shadow_test_v16/report.md"
         ]
     }
+    write_human_report(status, summary, comparisons, report_path)
     status_path.write_text(json.dumps(status, indent=2, default=str), encoding="utf-8")
     (out_dir / "status.json").write_text(json.dumps(status, indent=2, default=str), encoding="utf-8")
     print(json.dumps(status, indent=2, default=str), flush=True)

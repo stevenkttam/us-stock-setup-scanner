@@ -164,10 +164,25 @@ else:
         h4.metric("Invalid signal bars", f"{int(shadow_status.get('invalid_signal_bars', 0)):,}")
 
         o1, o2, o3, o4 = st.columns(4)
-        o1.metric("1-session outcomes", f"{int(shadow_status.get('completed_1d_outcomes', 0)):,}")
-        o2.metric("3-session outcomes", f"{int(shadow_status.get('completed_3d_outcomes', 0)):,}")
-        o3.metric("5-session outcomes", f"{int(shadow_status.get('completed_5d_outcomes', 0)):,}")
-        o4.metric("10-session outcomes", f"{int(shadow_status.get('completed_10d_outcomes', 0)):,}")
+        for metric, horizon in [(o1, 1), (o2, 3), (o3, 5), (o4, 10)]:
+            complete = int(shadow_status.get(f"completed_{horizon}d_outcomes", 0))
+            pending = int(shadow_status.get(f"pending_{horizon}d_outcomes", 0))
+            invalid = int(shadow_status.get(f"invalid_{horizon}d_outcomes", 0))
+            metric.metric(
+                f"{horizon}-session outcomes",
+                f"{complete:,} complete",
+                delta=f"{pending:,} pending · {invalid:,} invalid",
+                delta_color="off",
+            )
+
+        qc_counts = shadow_status.get("qc_event_counts", {})
+        st.caption(
+            f"QC composition across the recorded ledger: "
+            f"{int(qc_counts.get('clear', 0)):,} clear · "
+            f"{int(qc_counts.get('flagged', 0)):,} flagged · "
+            f"{int(qc_counts.get('unusual_volume', 0)):,} unusual volume · "
+            f"{int(qc_counts.get('countertrend', 0)):,} countertrend."
+        )
 
         st.caption(
             f"Latest market date tracked: **{shadow_status.get('latest_market_date', '—')}** · "

@@ -1,47 +1,62 @@
-# V16 Prospective QC Shadow Test — Restarted Cohort
+# V16 Prospective QC Shadow Test
 
-- **Status:** Awaiting first successful scheduled scan with corrected universe filters
-- **Research only:** Yes
-- **Production ready:** No
-- **Cohort reset date:** 2026-10-14
-- **Active signal events:** 0
-- **Active signal dates:** 0
-
-## Why the cohort was restarted
-
-The earlier live scanner applied the minimum price and average dollar-volume filters but did not enforce the configured **US$500 million minimum market capitalization**. Signals dated 2026-10-12 and 2026-10-13 have been preserved in the pre-fix archive and are excluded from the active prospective metrics so results use a consistent universe definition.
-
-Archive: `data/archive/v16_pre_market_cap_filter_2026-10-14/`
-
-Archive report: `artifacts/archive/v16_pre_market_cap_filter_2026-10-14/report.md`
-
-## Active universe filters
-
-| Filter | Requirement |
-|---|---:|
-| Closing price | At least US$5 |
-| Market capitalization | At least US$500 million |
-| 20-session average daily dollar volume | At least US$20 million |
-
-Market cap is retrieved from Yahoo Finance `fast_info` with a standard-info fallback. Symbols with unavailable market-cap data are excluded and counted in `artifacts/live_scan_status.json`.
+- Status: **success**
+- Research only: **True**
+- Latest market date: **2026-10-14**
+- Signal events: **255** across **1** signal dates
+- Long / Short: **75 / 180**
+- New events added on this run: **255**
 
 ## Outcome maturity
 
 | Holding horizon | Complete events | Pending events | Invalid/unusable events |
 |---:|---:|---:|---:|
-| 1 session | 0 | 0 | 0 |
-| 3 sessions | 0 | 0 | 0 |
-| 5 sessions | 0 | 0 | 0 |
-| 10 sessions | 0 | 0 | 0 |
+| 1 sessions | 0 | 255 | 0 |
+| 3 sessions | 0 | 255 | 0 |
+| 5 sessions | 0 | 255 | 0 |
+| 10 sessions | 0 | 255 | 0 |
 
-No performance estimate is available until the corrected scanner seeds its first eligible cohort and the specified outcome horizons mature.
+## Primary portfolio view
 
-## Evaluation guardrails
+Top 10 candidates, 5-session horizon, Base cost assumption. Returns are normalized to 10 target slots; unused slots are treated as cash. Confidence intervals are withheld until there are at least 20 scorable signal dates.
 
-- Base costs: 10 bps round trip and 3% annualized short borrow.
-- Stress costs: 25 bps round trip and 10% annualized short borrow.
-- Confidence intervals require at least 20 scorable dates; the decision gate requires at least 200 scorable signal dates under both cost scenarios.
-- QC-filter improvement requires at least 200 paired dates and a positive paired-difference confidence-interval lower bound under both cost scenarios.
-- Results remain research-only; passing a statistical gate would justify further replication, not approval to trade.
+| Direction | QC group | Signal dates | Scorable | Pending | Unscorable | Mean net portfolio return/date | 95% CI | Evidence gate |
+|---|---|---:|---:|---:|---:|---:|---|---|
+| Long | All | 1 | 0 | 1 | 0 | — | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Long | No Unusual Volume | 1 | 0 | 1 | 0 | — | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Long | QC Clear | 1 | 0 | 1 | 0 | — | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Long | QC Flagged | 1 | 0 | 1 | 0 | — | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Long | Unusual Volume | 1 | 1 | 0 | 0 | 0.00% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Short | All | 1 | 0 | 1 | 0 | — | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Short | No Unusual Volume | 1 | 0 | 1 | 0 | — | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Short | QC Clear | 1 | 0 | 1 | 0 | — | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Short | QC Flagged | 1 | 0 | 1 | 0 | — | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Short | Unusual Volume | 1 | 0 | 1 | 0 | — | Not available yet | Collecting; need 200 scorable dates under both cost cases |
 
-See [the cohort correction note](../../docs/universe_filter_change_2026-10-14.md) and [the pre-fix archive](../../data/archive/v16_pre_market_cap_filter_2026-10-14/report.md).
+## QC filter comparison
+
+Top 10 QC group minus All. A positive value favors the QC group; for a QC-clear filter, the 95% paired-difference interval must be entirely above zero under both cost assumptions and there must be at least 200 paired dates.
+
+| Direction | Comparison | Paired dates | Mean difference | 95% CI | Evidence gate |
+|---|---|---:|---:|---|---|
+| Long | QC Clear minus All | 0 | — | Not available yet | Collecting; need 200 paired dates under both cost cases |
+| Long | QC Flagged minus All | 0 | — | Not available yet | Collecting; need 200 paired dates under both cost cases |
+| Short | QC Clear minus All | 0 | — | Not available yet | Collecting; need 200 paired dates under both cost cases |
+| Short | QC Flagged minus All | 0 | — | Not available yet | Collecting; need 200 paired dates under both cost cases |
+
+## Cost assumptions
+
+- Base: 10 bps round-trip; 3% annualized short borrow.
+- Stress: 25 bps round-trip; 10% annualized short borrow.
+- These are fixed sensitivity assumptions, not broker-specific costs or guaranteed execution prices.
+
+## Interpretation
+
+This is a prospective research-only shadow test. It does not submit orders, change ranking scores, establish calibrated probabilities, or approve a strategy for real-money trading. A promising result requires independent replication and further execution-cost review.
+
+## Detailed files
+
+- data/shadow/shadow_ledger.csv
+- data/shadow/shadow_daily_portfolios.csv
+- data/shadow/shadow_group_summary.csv
+- data/shadow/shadow_qc_comparisons.csv

@@ -357,11 +357,18 @@ def make_daily_portfolios(candidates: pd.DataFrame, outcomes: pd.DataFrame) -> p
             "Unusual Volume": all_for_date[all_for_date["QCUnusualVolume"]],
         }
         partition = str(all_for_date["Partition"].iloc[0]) if "Partition" in all_for_date else "Unknown"
+        # Split-boundary signals have no outcome rows for that horizon for any
+        # ticker on the date. Omit the whole date/horizon, not mark it unscorable.
+        date_ids = all_for_date["CandidateID"].astype(str).tolist()
+        available_horizons = [
+            h for h in HORIZONS
+            if any((candidate_id, int(h)) in lookup for candidate_id in date_ids)
+        ]
         for group_name, subset in groups.items():
             ranked = subset.sort_values(["SetupScore", "Ticker"], ascending=[False, True], kind="mergesort")
             for top_k in TOP_KS:
                 selected = ranked.head(top_k)
-                for horizon in HORIZONS:
+                for horizon in available_horizons:
                     selected_outcomes = [lookup.get((str(cid), int(horizon))) for cid in selected["CandidateID"]]
                     if selected.empty:
                         status, selected_trades = "no_candidates", []

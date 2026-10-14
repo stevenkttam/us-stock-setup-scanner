@@ -1,6 +1,8 @@
 universe:
   min_price: 5.0
+  min_market_cap_usd: 500000000
   min_avg_dollar_volume_20d: 20000000
+  market_cap_lookup_workers: 4
   exchanges: [N, A, T]
   include_adrs: true
   exclude_etfs: true

@@ -37,6 +37,7 @@ jobs:
         run: python tests/test_eod_setup_backtest_v17.py
 
   research:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[run-v17]')
     runs-on: ubuntu-latest
     timeout-minutes: 240
     env:

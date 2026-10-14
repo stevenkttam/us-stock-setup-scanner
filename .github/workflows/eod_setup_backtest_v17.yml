@@ -1,0 +1,90 @@
+name: Research V17 Historical Replay of Live EOD Setup Scanner
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/eod_setup_backtest_v17.py"
+      - "tests/test_eod_setup_backtest_v17.py"
+      - ".github/workflows/eod_setup_backtest_v17.yml"
+      - "scanner/features.py"
+      - "scanner/scan.py"
+      - "scanner/data.py"
+      - "scanner/market_cap.py"
+      - "scanner/universe.py"
+      - "scripts/run_live_scan.py"
+      - "config.yaml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: .
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Compile V17 backtest
+        run: python -m py_compile scripts/eod_setup_backtest_v17.py
+      - name: Test execution rules and data checks
+        run: python tests/test_eod_setup_backtest_v17.py
+
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    env:
+      PYTHONPATH: .
+      PYTHONUNBUFFERED: "1"
+      SCANNER_MAX_SYMBOLS: "1000"
+      SCANNER_BATCH_SIZE: "50"
+      SCANNER_PERIOD: "10y"
+      SCANNER_MARKET_CAP_WORKERS: "6"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Compile V17 backtest
+        run: python -m py_compile scripts/eod_setup_backtest_v17.py
+      - name: Run historical replay with live heuristic scores
+        run: python scripts/eod_setup_backtest_v17.py
+      - name: Publish holdout results
+        run: |
+          python - <<'PY'
+          import json, os, pathlib, pandas as pd
+          root = pathlib.Path("artifacts/eod_setup_backtest_v17")
+          s = json.loads((root / "summary.json").read_text())
+          m = pd.read_csv(root / "portfolio_metrics.csv")
+          primary = m[
+              (m.Partition == "Holdout") & (m.QCGroup == "All")
+              & (m.TopK.isin([10, 40])) & (m.Horizon.isin([5, 10]))
+              & (m.CostScenario == "Base")
+          ]
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as f:
+              f.write("# V17 Historical Replay of Live EOD Heuristic Setup Scanner\n\n")
+              f.write(f"- Current sampled symbols: {s['sample_requested']:,}; current market-cap qualified: {s['symbols_market_cap_qualified']:,}; histories downloaded: {s['symbols_downloaded']:,}\n")
+              f.write(f"- Historical events / signal dates: {s['candidate_events']:,} / {s['candidate_dates']:,}\n")
+              f.write(f"- Data range: {s['data_start']} to {s['data_end']}; holdout starts {s['holdout_cut']}\n")
+              f.write("- IMPORTANT: market-cap qualification uses current Yahoo Finance market cap as a static proxy, not point-in-time historical market cap. Results retain look-ahead and survivorship bias.\n\n")
+              f.write("| Direction | Top K | Horizon | Scorable dates | Trades | Mean daily net return | 95% CI | Directional excess vs SPY | Excess 95% CI |\n")
+              f.write("|---|---:|---:|---:|---:|---:|---:|---:|---|\n")
+              for _, r in primary.sort_values(["Direction", "TopK", "Horizon"]).iterrows():
+                  def p(v): return "n/a" if pd.isna(v) else f"{v:.2%}"
+                  f.write(f"| {r.Direction} | {int(r.TopK)} | {int(r.Horizon)} | {int(r.ScorableDates)} | {int(r.TotalTrades)} | {p(r.MeanDailyNetPnL)} | [{p(r.NetCI95Low)}, {p(r.NetCI95High)}] | {p(r.MeanDailyExcessVsSPY)} | [{p(r.AlphaCI95Low)}, {p(r.AlphaCI95High)}] |\n")
+              f.write("\nResearch only. Returns are per signal-date cohort, holding periods overlap, and are not a compounded equity curve. Read report.md for assumptions and limits.\n")
+          PY
+      - name: Upload V17 historical backtest report and tables
+        uses: actions/upload-artifact@v7
+        with:
+          name: eod-setup-backtest-v17
+          path: artifacts/eod_setup_backtest_v17/
+          retention-days: 90

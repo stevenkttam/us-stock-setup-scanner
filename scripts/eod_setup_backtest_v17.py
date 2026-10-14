@@ -85,13 +85,15 @@ def block_bootstrap_ci(values, reps: int = BOOTSTRAP_REPS, block: int = BOOTSTRA
     if n < 2 * block:
         return mean, np.nan, np.nan
     rng = np.random.default_rng(seed)
-    estimates = np.empty(reps)
     n_blocks = int(np.ceil(n / block))
     offsets = np.arange(block)
-    for i in range(reps):
-        starts = rng.integers(0, n, size=n_blocks)
-        sample = np.concatenate([arr[(start + offsets) % n] for start in starts])[:n]
-        estimates[i] = sample.mean()
+    # Vectorize all replicates. This preserves circular moving blocks and
+    # the predeclared block length / replicate count, avoiding millions of
+    # tiny Python-level array allocations.
+    starts = rng.integers(0, n, size=(reps, n_blocks))
+    indices = (starts[:, :, None] + offsets[None, None, :]) % n
+    sampled = arr[indices].reshape(reps, -1)[:, :n]
+    estimates = sampled.mean(axis=1)
     return mean, float(np.quantile(estimates, 0.025)), float(np.quantile(estimates, 0.975))
 
 

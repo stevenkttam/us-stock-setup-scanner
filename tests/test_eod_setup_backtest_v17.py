@@ -84,6 +84,12 @@ class V17BacktestTests(unittest.TestCase):
         self.assertTrue(np.isfinite(low))
         self.assertTrue(np.isfinite(high))
 
+    def test_bootstrap_is_reproducible_for_fixed_seed(self):
+        values = np.linspace(-0.04, 0.06, 80)
+        first = block_bootstrap_ci(values, reps=100, block=10, seed=123)
+        second = block_bootstrap_ci(values, reps=100, block=10, seed=123)
+        self.assertEqual(first, second)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

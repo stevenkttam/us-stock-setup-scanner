@@ -62,8 +62,10 @@ class V17BacktestTests(unittest.TestCase):
 
     def test_stop_gap_fills_at_open(self):
         prices = self.prices.copy()
-        prices.loc[pd.Timestamp("2026-01-06"), ["Open", "High", "Low", "Close"]] = [8.7, 9.0, 8.4, 8.8]
-        out = simulate_trade(self.candidate, prices, self.spy, self.calendar, 1)
+        # Entry is at 10 on Jan 6. The recalculated stop is 9, and the next
+        # session opens below it, so the stop should fill at that day's open.
+        prices.loc[pd.Timestamp("2026-01-07"), ["Open", "High", "Low", "Close"]] = [8.7, 9.0, 8.4, 8.8]
+        out = simulate_trade(self.candidate, prices, self.spy, self.calendar, 2)
         self.assertEqual(out["ExitReason"], "stop_gap")
         self.assertAlmostEqual(out["ExitPrice"], 8.7)
 

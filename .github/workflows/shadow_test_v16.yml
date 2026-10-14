@@ -6,7 +6,10 @@ on:
       - main
     paths:
       - "scripts/update_shadow_test_v16.py"
-      - "tests/test_shadow_tracker_v16.py"
+      - "scripts/run_live_scan.py"
+      - "scanner/**"
+      - "tests/**"
+      - "config.yaml"
       - "app.py"
       - ".github/workflows/shadow_test_v16.yml"
   workflow_run:
@@ -51,6 +54,8 @@ jobs:
           cat /tmp/streamlit.log
           kill "$STREAMLIT_PID" || true
           exit 1
+      - name: Test free market-cap lookup and fail-closed filter
+        run: python tests/test_live_scan.py
       - name: Test dates, matched returns, costs, and QC labels
         run: python tests/test_shadow_tracker_v16.py
 

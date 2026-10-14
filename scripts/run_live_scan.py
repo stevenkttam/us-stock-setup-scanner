@@ -12,6 +12,7 @@ from scanner.data import download_daily
 from scanner.features import add_features, classify_regime
 from scanner.scan import scan_symbol
 from scanner.universe import fetch_us_universe
+from scanner.market_cap import fetch_market_caps, market_cap_meets_threshold
 
 
 def download_spy_with_retry(period: str = "1y", attempts: int = 4) -> pd.DataFrame:
@@ -180,7 +181,9 @@ def main():
     price_map = download_daily(symbols, period="1y", batch_size=50, sleep_seconds=1.25)
     print(f"Downloaded {len(price_map)} of {len(symbols)} universe symbols.", flush=True)
 
-    rows = []
+    # First apply the inexpensive historical-price and dollar-volume filters.
+    # Only the reduced pool gets a per-symbol market-cap metadata lookup.
+    liquid_symbols = []
     for yahoo_ticker, prices in price_map.items():
         try:
             if prices is None or prices.empty or not {"Close", "Volume"}.issubset(prices.columns):
@@ -194,16 +197,61 @@ def main():
                 or float(avg_dollar) < cfg["universe"]["min_avg_dollar_volume_20d"]
             ):
                 continue
+            liquid_symbols.append({
+                "YahooSymbol": yahoo_ticker,
+                "Prices": prices,
+                "AvgDollarVolume20D": float(avg_dollar),
+            })
+        except Exception as exc:
+            print(f"SKIP {yahoo_ticker}: {type(exc).__name__}: {exc}", flush=True)
 
-            featured = add_features(prices, spy=spy)
+    min_market_cap = float(cfg["universe"].get("min_market_cap_usd", 500_000_000))
+    market_caps = fetch_market_caps(
+        [row["YahooSymbol"] for row in liquid_symbols],
+        max_workers=int(cfg["universe"].get("market_cap_lookup_workers", 4)),
+    )
+    market_cap_known = sum(value is not None for value in market_caps.values())
+    market_cap_passed = sum(
+        market_cap_meets_threshold(value, min_market_cap) for value in market_caps.values()
+    )
+    market_cap_rejected = sum(
+        value is not None and not market_cap_meets_threshold(value, min_market_cap)
+        for value in market_caps.values()
+    )
+    market_cap_unavailable = sum(value is None for value in market_caps.values())
+    print(
+        "Universe filters: "
+        f"{len(liquid_symbols)} passed price/dollar-volume; "
+        f"{market_cap_passed} passed market cap >= ${min_market_cap:,.0f}; "
+        f"{market_cap_rejected} below threshold; "
+        f"{market_cap_unavailable} with unavailable market cap (excluded).",
+        flush=True,
+    )
+
+    rows = []
+    for item in liquid_symbols:
+        yahoo_ticker = item["YahooSymbol"]
+        market_cap = market_caps.get(yahoo_ticker)
+        if not market_cap_meets_threshold(market_cap, min_market_cap):
+            continue
+        try:
+            featured = add_features(item["Prices"], spy=spy)
             longs, shorts = scan_symbol(featured, mapping.get(yahoo_ticker, yahoo_ticker), regime, cfg)
-            rows.extend(longs + shorts)
+            for candidate in longs + shorts:
+                candidate["MarketCapUSD"] = float(market_cap)
+                candidate["AvgDollarVolume20D"] = float(item["AvgDollarVolume20D"])
+                rows.append(candidate)
         except Exception as exc:
             print(f"SKIP {yahoo_ticker}: {type(exc).__name__}: {exc}", flush=True)
 
     candidates = pd.DataFrame(rows)
     if candidates.empty:
-        raise SystemExit("No candidates generated; no new scan was published.")
+        raise SystemExit(
+            "No candidates generated; no new scan was published. "
+            f"{len(liquid_symbols)} symbols passed price/dollar-volume filters; "
+            f"{market_cap_passed} also passed market cap; "
+            f"{market_cap_unavailable} market-cap lookups were unavailable and those symbols were excluded."
+        )
 
     # Do not publish unvalidated historical-model probabilities, expected-R
     # estimates, or A/B/C tiers. Current setup scores are heuristic rankings only.
@@ -231,6 +279,16 @@ def main():
         "universe_size": int(len(universe)),
         "symbols_requested": int(len(symbols)),
         "symbols_downloaded": int(len(price_map)),
+        "min_price_usd": float(cfg["universe"]["min_price"]),
+        "min_market_cap_usd": min_market_cap,
+        "min_avg_dollar_volume_20d_usd": float(cfg["universe"]["min_avg_dollar_volume_20d"]),
+        "liquid_universe_candidates": int(len(liquid_symbols)),
+        "market_cap_lookups_attempted": int(len(market_caps)),
+        "market_cap_known": int(market_cap_known),
+        "market_cap_qualified": int(market_cap_passed),
+        "market_cap_rejected_below_min": int(market_cap_rejected),
+        "market_cap_unavailable_excluded": int(market_cap_unavailable),
+        "market_cap_source": "Yahoo Finance fast_info with standard info fallback; unknown values excluded",
         "candidates": int(len(candidates)),
         "longs": int((candidates["Direction"] == "Long").sum()),
         "shorts": int((candidates["Direction"] == "Short").sum()),

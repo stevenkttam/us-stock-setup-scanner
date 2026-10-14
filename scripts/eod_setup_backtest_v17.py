@@ -295,6 +295,15 @@ def build_historical_candidates(price_map, spy, cap_map, symbol_map, cfg) -> tup
         raise RuntimeError("No historical candidates generated. Diagnostics: " + json.dumps(diagnostics, default=str))
     candidates = pd.concat(frames, ignore_index=True)
     candidates = add_quality_control_flags(candidates)
+    # The live helper emits human-readable flags; materialize the group labels
+    # required by historical portfolio comparisons without changing live scores.
+    candidates["QCFlagged"] = (
+        candidates["QualityFlags"].fillna("No automatic QC flags").astype(str)
+        != "No automatic QC flags"
+    )
+    volume_acceleration = pd.to_numeric(candidates.get("VolumeAcceleration"), errors="coerce")
+    rvol20 = pd.to_numeric(candidates.get("RVOL20"), errors="coerce")
+    candidates["QCUnusualVolume"] = volume_acceleration.ge(10) | rvol20.ge(10)
     candidates = candidates.sort_values(
         ["SignalDate", "Direction", "SetupScore", "Ticker"],
         ascending=[True, True, False, True], kind="mergesort",

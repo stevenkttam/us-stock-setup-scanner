@@ -3,61 +3,61 @@
   "research_version": "V16 Prospective QC Shadow Test",
   "research_only": true,
   "production_ready": false,
-  "new_signals_added_this_run": 255,
-  "signal_seed_note": "added 255 unique candidate events for signal date 2026-10-14",
+  "new_signals_added_this_run": 462,
+  "signal_seed_note": "added 462 unique candidate events for signal date 2026-10-15",
   "allow_new_signals": true,
-  "ledger_events": 255,
-  "unique_signal_dates": 1,
-  "long_events": 75,
-  "short_events": 180,
-  "valid_signal_bars": 255,
+  "ledger_events": 717,
+  "unique_signal_dates": 2,
+  "long_events": 366,
+  "short_events": 351,
+  "valid_signal_bars": 717,
   "invalid_signal_bars": 0,
-  "completed_1d_outcomes": 0,
-  "pending_1d_outcomes": 255,
+  "completed_1d_outcomes": 255,
+  "pending_1d_outcomes": 462,
   "invalid_1d_outcomes": 0,
   "completed_3d_outcomes": 0,
-  "pending_3d_outcomes": 255,
+  "pending_3d_outcomes": 717,
   "invalid_3d_outcomes": 0,
   "completed_5d_outcomes": 0,
-  "pending_5d_outcomes": 255,
+  "pending_5d_outcomes": 717,
   "invalid_5d_outcomes": 0,
   "completed_10d_outcomes": 0,
-  "pending_10d_outcomes": 255,
+  "pending_10d_outcomes": 717,
   "invalid_10d_outcomes": 0,
   "outcome_status_counts_by_horizon": {
     "1": {
-      "complete": 0,
-      "pending": 255,
+      "complete": 255,
+      "pending": 462,
       "invalid": 0
     },
     "3": {
       "complete": 0,
-      "pending": 255,
+      "pending": 717,
       "invalid": 0
     },
     "5": {
       "complete": 0,
-      "pending": 255,
+      "pending": 717,
       "invalid": 0
     },
     "10": {
       "complete": 0,
-      "pending": 255,
+      "pending": 717,
       "invalid": 0
     }
   },
   "qc_event_counts": {
-    "clear": 223,
-    "flagged": 32,
-    "unusual_volume": 1,
-    "countertrend": 0
+    "clear": 477,
+    "flagged": 240,
+    "unusual_volume": 4,
+    "countertrend": 171
   },
   "outcome_update_counts_this_run": {
-    "complete": 0,
+    "complete": 255,
     "pending": 0,
     "invalid": 0
   },
-  "latest_market_date": "2026-10-14",
+  "latest_market_date": "2026-10-15",
   "cost_assumptions": {
     "Base": {
       "round_trip_cost_bps": 10.0,

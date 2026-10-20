@@ -3,61 +3,61 @@
   "research_version": "V16 Prospective QC Shadow Test",
   "research_only": true,
   "production_ready": false,
-  "new_signals_added_this_run": 92,
-  "signal_seed_note": "added 92 unique candidate events for signal date 2026-10-19",
+  "new_signals_added_this_run": 206,
+  "signal_seed_note": "added 206 unique candidate events for signal date 2026-10-20",
   "allow_new_signals": true,
-  "ledger_events": 1086,
-  "unique_signal_dates": 4,
-  "long_events": 490,
-  "short_events": 596,
-  "valid_signal_bars": 1086,
+  "ledger_events": 1292,
+  "unique_signal_dates": 5,
+  "long_events": 629,
+  "short_events": 663,
+  "valid_signal_bars": 1291,
   "invalid_signal_bars": 0,
-  "completed_1d_outcomes": 994,
-  "pending_1d_outcomes": 92,
+  "completed_1d_outcomes": 1085,
+  "pending_1d_outcomes": 207,
   "invalid_1d_outcomes": 0,
-  "completed_3d_outcomes": 254,
-  "pending_3d_outcomes": 831,
-  "invalid_3d_outcomes": 1,
+  "completed_3d_outcomes": 715,
+  "pending_3d_outcomes": 577,
+  "invalid_3d_outcomes": 0,
   "completed_5d_outcomes": 0,
-  "pending_5d_outcomes": 1086,
+  "pending_5d_outcomes": 1292,
   "invalid_5d_outcomes": 0,
   "completed_10d_outcomes": 0,
-  "pending_10d_outcomes": 1086,
+  "pending_10d_outcomes": 1292,
   "invalid_10d_outcomes": 0,
   "outcome_status_counts_by_horizon": {
     "1": {
-      "complete": 994,
-      "pending": 92,
+      "complete": 1085,
+      "pending": 207,
       "invalid": 0
     },
     "3": {
-      "complete": 254,
-      "pending": 831,
-      "invalid": 1
+      "complete": 715,
+      "pending": 577,
+      "invalid": 0
     },
     "5": {
       "complete": 0,
-      "pending": 1086,
+      "pending": 1292,
       "invalid": 0
     },
     "10": {
       "complete": 0,
-      "pending": 1086,
+      "pending": 1292,
       "invalid": 0
     }
   },
   "qc_event_counts": {
-    "clear": 817,
-    "flagged": 269,
-    "unusual_volume": 6,
+    "clear": 1005,
+    "flagged": 287,
+    "unusual_volume": 13,
     "countertrend": 171
   },
   "outcome_update_counts_this_run": {
-    "complete": 531,
-    "pending": 0,
+    "complete": 552,
+    "pending": 1,
     "invalid": 0
   },
-  "latest_market_date": "2026-10-19",
+  "latest_market_date": "2026-10-20",
   "cost_assumptions": {
     "Base": {
       "round_trip_cost_bps": 10.0,

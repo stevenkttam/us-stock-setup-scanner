@@ -2,19 +2,19 @@
 
 - Status: **success**
 - Research only: **True**
-- Latest market date: **2026-10-19**
-- Signal events: **1,086** across **4** signal dates
-- Long / Short: **490 / 596**
-- New events added on this run: **92**
+- Latest market date: **2026-10-20**
+- Signal events: **1,292** across **5** signal dates
+- Long / Short: **629 / 663**
+- New events added on this run: **206**
 
 ## Outcome maturity
 
 | Holding horizon | Complete events | Pending events | Invalid/unusable events |
 |---:|---:|---:|---:|
-| 1 sessions | 994 | 92 | 0 |
-| 3 sessions | 254 | 831 | 1 |
-| 5 sessions | 0 | 1,086 | 0 |
-| 10 sessions | 0 | 1,086 | 0 |
+| 1 sessions | 1,085 | 207 | 0 |
+| 3 sessions | 715 | 577 | 0 |
+| 5 sessions | 0 | 1,292 | 0 |
+| 10 sessions | 0 | 1,292 | 0 |
 
 ## Primary portfolio view
 
@@ -22,16 +22,16 @@ Top 10 candidates, 5-session horizon, Base cost assumption. Returns are normaliz
 
 | Direction | QC group | Signal dates | Scorable | Pending | Unscorable | Mean net portfolio return/date | 95% CI | Evidence gate |
 |---|---|---:|---:|---:|---:|---:|---|---|
-| Long | All | 4 | 0 | 4 | 0 | — | Not available yet | Collecting; need 200 scorable dates under both cost cases |
-| Long | No Unusual Volume | 4 | 0 | 4 | 0 | — | Not available yet | Collecting; need 200 scorable dates under both cost cases |
-| Long | QC Clear | 4 | 0 | 4 | 0 | — | Not available yet | Collecting; need 200 scorable dates under both cost cases |
-| Long | QC Flagged | 4 | 0 | 4 | 0 | — | Not available yet | Collecting; need 200 scorable dates under both cost cases |
-| Long | Unusual Volume | 4 | 2 | 2 | 0 | 0.00% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
-| Short | All | 4 | 0 | 4 | 0 | — | Not available yet | Collecting; need 200 scorable dates under both cost cases |
-| Short | No Unusual Volume | 4 | 0 | 4 | 0 | — | Not available yet | Collecting; need 200 scorable dates under both cost cases |
-| Short | QC Clear | 4 | 1 | 3 | 0 | 0.00% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
-| Short | QC Flagged | 4 | 0 | 4 | 0 | — | Not available yet | Collecting; need 200 scorable dates under both cost cases |
-| Short | Unusual Volume | 4 | 2 | 2 | 0 | 0.00% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Long | All | 5 | 0 | 5 | 0 | — | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Long | No Unusual Volume | 5 | 0 | 5 | 0 | — | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Long | QC Clear | 5 | 0 | 5 | 0 | — | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Long | QC Flagged | 5 | 0 | 5 | 0 | — | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Long | Unusual Volume | 5 | 2 | 3 | 0 | 0.00% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Short | All | 5 | 0 | 5 | 0 | — | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Short | No Unusual Volume | 5 | 0 | 5 | 0 | — | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Short | QC Clear | 5 | 1 | 4 | 0 | 0.00% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Short | QC Flagged | 5 | 0 | 5 | 0 | — | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Short | Unusual Volume | 5 | 2 | 3 | 0 | 0.00% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
 
 ## QC filter comparison
 

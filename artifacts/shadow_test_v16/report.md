@@ -2,19 +2,19 @@
 
 - Status: **success**
 - Research only: **True**
-- Latest market date: **2026-10-23**
-- Signal events: **2,187** across **8** signal dates
-- Long / Short: **1,120 / 1,067**
-- New events added on this run: **221**
+- Latest market date: **2026-10-26**
+- Signal events: **2,350** across **9** signal dates
+- Long / Short: **1,212 / 1,138**
+- New events added on this run: **163**
 
 ## Outcome maturity
 
 | Holding horizon | Complete events | Pending events | Invalid/unusable events |
 |---:|---:|---:|---:|
-| 1 sessions | 1,965 | 222 | 0 |
-| 3 sessions | 1,289 | 898 | 0 |
-| 5 sessions | 992 | 1,195 | 0 |
-| 10 sessions | 0 | 2,187 | 0 |
+| 1 sessions | 2,186 | 164 | 0 |
+| 3 sessions | 1,468 | 882 | 0 |
+| 5 sessions | 1,083 | 1,267 | 0 |
+| 10 sessions | 0 | 2,350 | 0 |
 
 ## Primary portfolio view
 
@@ -22,16 +22,16 @@ Top 10 candidates, 5-session horizon, Base cost assumption. Returns are normaliz
 
 | Direction | QC group | Signal dates | Scorable | Pending | Unscorable | Mean net portfolio return/date | 95% CI | Evidence gate |
 |---|---|---:|---:|---:|---:|---:|---|---|
-| Long | All | 8 | 2 | 6 | 0 | 2.17% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
-| Long | No Unusual Volume | 8 | 2 | 6 | 0 | 2.17% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
-| Long | QC Clear | 8 | 2 | 6 | 0 | 2.17% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
-| Long | QC Flagged | 8 | 3 | 5 | 0 | -0.30% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
-| Long | Unusual Volume | 8 | 5 | 3 | 0 | 0.03% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
-| Short | All | 8 | 3 | 5 | 0 | -0.99% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
-| Short | No Unusual Volume | 8 | 3 | 5 | 0 | -1.10% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
-| Short | QC Clear | 8 | 4 | 4 | 0 | -1.05% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
-| Short | QC Flagged | 8 | 3 | 5 | 0 | 3.51% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
-| Short | Unusual Volume | 8 | 5 | 3 | 0 | 0.14% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Long | All | 9 | 3 | 6 | 0 | 2.36% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Long | No Unusual Volume | 9 | 3 | 6 | 0 | 2.13% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Long | QC Clear | 9 | 3 | 6 | 0 | 2.13% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Long | QC Flagged | 9 | 4 | 5 | 0 | -0.22% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Long | Unusual Volume | 9 | 6 | 3 | 0 | -0.01% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Short | All | 9 | 4 | 5 | 0 | -0.72% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Short | No Unusual Volume | 9 | 4 | 5 | 0 | -0.80% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Short | QC Clear | 9 | 5 | 4 | 0 | -0.56% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Short | QC Flagged | 9 | 4 | 5 | 0 | 2.39% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Short | Unusual Volume | 9 | 5 | 4 | 0 | 0.14% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
 
 ## QC filter comparison
 
@@ -39,10 +39,10 @@ Top 10 QC group minus All. A positive value favors the QC group; for a QC-clear 
 
 | Direction | Comparison | Paired dates | Mean difference | 95% CI | Evidence gate |
 |---|---|---:|---:|---|---|
-| Long | QC Clear minus All | 2 | 0.00% | Not available yet | Collecting; need 200 paired dates under both cost cases |
-| Long | QC Flagged minus All | 2 | -0.69% | Not available yet | Collecting; need 200 paired dates under both cost cases |
-| Short | QC Clear minus All | 3 | -0.40% | Not available yet | Collecting; need 200 paired dates under both cost cases |
-| Short | QC Flagged minus All | 3 | 4.51% | Not available yet | Collecting; need 200 paired dates under both cost cases |
+| Long | QC Clear minus All | 3 | -0.23% | Not available yet | Collecting; need 200 paired dates under both cost cases |
+| Long | QC Flagged minus All | 3 | -1.37% | Not available yet | Collecting; need 200 paired dates under both cost cases |
+| Short | QC Clear minus All | 4 | 0.02% | Not available yet | Collecting; need 200 paired dates under both cost cases |
+| Short | QC Flagged minus All | 4 | 3.11% | Not available yet | Collecting; need 200 paired dates under both cost cases |
 
 ## Cost assumptions
 

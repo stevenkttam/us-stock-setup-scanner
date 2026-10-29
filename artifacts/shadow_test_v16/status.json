@@ -3,61 +3,61 @@
   "research_version": "V16 Prospective QC Shadow Test",
   "research_only": true,
   "production_ready": false,
-  "new_signals_added_this_run": 257,
-  "signal_seed_note": "added 257 unique candidate events for signal date 2026-10-28",
+  "new_signals_added_this_run": 320,
+  "signal_seed_note": "added 320 unique candidate events for signal date 2026-10-29",
   "allow_new_signals": true,
-  "ledger_events": 2803,
-  "unique_signal_dates": 11,
-  "long_events": 1445,
-  "short_events": 1358,
-  "valid_signal_bars": 2803,
+  "ledger_events": 3123,
+  "unique_signal_dates": 12,
+  "long_events": 1664,
+  "short_events": 1459,
+  "valid_signal_bars": 3123,
   "invalid_signal_bars": 0,
-  "completed_1d_outcomes": 2545,
-  "pending_1d_outcomes": 258,
+  "completed_1d_outcomes": 2802,
+  "pending_1d_outcomes": 321,
   "invalid_1d_outcomes": 0,
-  "completed_3d_outcomes": 2183,
-  "pending_3d_outcomes": 620,
+  "completed_3d_outcomes": 2346,
+  "pending_3d_outcomes": 777,
   "invalid_3d_outcomes": 0,
-  "completed_5d_outcomes": 1468,
-  "pending_5d_outcomes": 1335,
+  "completed_5d_outcomes": 1962,
+  "pending_5d_outcomes": 1161,
   "invalid_5d_outcomes": 0,
-  "completed_10d_outcomes": 255,
-  "pending_10d_outcomes": 2548,
+  "completed_10d_outcomes": 714,
+  "pending_10d_outcomes": 2409,
   "invalid_10d_outcomes": 0,
   "outcome_status_counts_by_horizon": {
     "1": {
-      "complete": 2545,
-      "pending": 258,
+      "complete": 2802,
+      "pending": 321,
       "invalid": 0
     },
     "3": {
-      "complete": 2183,
-      "pending": 620,
+      "complete": 2346,
+      "pending": 777,
       "invalid": 0
     },
     "5": {
-      "complete": 1468,
-      "pending": 1335,
+      "complete": 1962,
+      "pending": 1161,
       "invalid": 0
     },
     "10": {
-      "complete": 255,
-      "pending": 2548,
+      "complete": 714,
+      "pending": 2409,
       "invalid": 0
     }
   },
   "qc_event_counts": {
-    "clear": 2093,
-    "flagged": 710,
-    "unusual_volume": 33,
-    "countertrend": 488
+    "clear": 2293,
+    "flagged": 830,
+    "unusual_volume": 38,
+    "countertrend": 589
   },
   "outcome_update_counts_this_run": {
-    "complete": 852,
-    "pending": 0,
+    "complete": 1373,
+    "pending": 54,
     "invalid": 0
   },
-  "latest_market_date": "2026-10-28",
+  "latest_market_date": "2026-10-29",
   "cost_assumptions": {
     "Base": {
       "round_trip_cost_bps": 10.0,

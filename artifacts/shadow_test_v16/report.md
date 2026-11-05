@@ -2,19 +2,19 @@
 
 - Status: **success**
 - Research only: **True**
-- Latest market date: **2026-11-03**
+- Latest market date: **2026-11-04**
 - Signal events: **4,061** across **15** signal dates
 - Long / Short: **2,150 / 1,911**
-- New events added on this run: **147**
+- New events added on this run: **0**
 
 ## Outcome maturity
 
 | Holding horizon | Complete events | Pending events | Invalid/unusable events |
 |---:|---:|---:|---:|
-| 1 sessions | 3,910 | 151 | 0 |
-| 3 sessions | 3,117 | 944 | 0 |
-| 5 sessions | 2,539 | 1,522 | 0 |
-| 10 sessions | 1,287 | 2,774 | 0 |
+| 1 sessions | 3,910 | 4 | 147 |
+| 3 sessions | 3,117 | 543 | 401 |
+| 5 sessions | 2,539 | 1,264 | 258 |
+| 10 sessions | 1,288 | 2,595 | 178 |
 
 ## Primary portfolio view
 
@@ -25,13 +25,13 @@ Top 10 candidates, 5-session horizon, Base cost assumption. Returns are normaliz
 | Long | All | 15 | 7 | 8 | 0 | 1.85% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
 | Long | No Unusual Volume | 15 | 7 | 8 | 0 | 1.79% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
 | Long | QC Clear | 15 | 7 | 8 | 0 | 1.38% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
-| Long | QC Flagged | 15 | 10 | 5 | 0 | -0.50% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
-| Long | Unusual Volume | 15 | 11 | 4 | 0 | -0.39% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
-| Short | All | 15 | 10 | 5 | 0 | -1.47% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
-| Short | No Unusual Volume | 15 | 9 | 6 | 0 | -1.99% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
-| Short | QC Clear | 15 | 11 | 4 | 0 | -0.56% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
-| Short | QC Flagged | 15 | 10 | 5 | 0 | -0.52% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
-| Short | Unusual Volume | 15 | 12 | 3 | 0 | -0.21% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Long | QC Flagged | 15 | 10 | 4 | 1 | -0.50% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Long | Unusual Volume | 15 | 11 | 3 | 1 | -0.39% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Short | All | 15 | 10 | 4 | 1 | -1.47% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Short | No Unusual Volume | 15 | 9 | 4 | 2 | -1.99% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Short | QC Clear | 15 | 11 | 3 | 1 | -0.56% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Short | QC Flagged | 15 | 10 | 4 | 1 | -0.52% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
+| Short | Unusual Volume | 15 | 12 | 2 | 1 | -0.21% | Not available yet | Collecting; need 200 scorable dates under both cost cases |
 
 ## QC filter comparison
 

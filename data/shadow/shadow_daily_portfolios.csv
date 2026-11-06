@@ -559,42 +559,42 @@ SignalDate,Direction,QCGroup,TopK,Horizon,CostScenario,NTrades,TargetSlots,SlotC
 2026-11-02,Short,Unusual Volume,10,1,Stress,0,10,0.0,0,0,0,no_candidates,0.0,0.0,0.0,,,
 2026-11-02,Short,Unusual Volume,40,1,Base,0,40,0.0,0,0,0,no_candidates,0.0,0.0,0.0,,,
 2026-11-02,Short,Unusual Volume,40,1,Stress,0,40,0.0,0,0,0,no_candidates,0.0,0.0,0.0,,,
-2026-11-03,Long,All,10,1,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
-2026-11-03,Long,All,10,1,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
-2026-11-03,Long,All,40,1,Base,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
-2026-11-03,Long,All,40,1,Stress,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
-2026-11-03,Long,QC Clear,10,1,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
-2026-11-03,Long,QC Clear,10,1,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
-2026-11-03,Long,QC Clear,40,1,Base,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
-2026-11-03,Long,QC Clear,40,1,Stress,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
-2026-11-03,Long,QC Flagged,10,1,Base,0,10,,6,0,6,unscorable_missing_outcome,,,,,,
-2026-11-03,Long,QC Flagged,10,1,Stress,0,10,,6,0,6,unscorable_missing_outcome,,,,,,
-2026-11-03,Long,QC Flagged,40,1,Base,0,40,,6,0,6,unscorable_missing_outcome,,,,,,
-2026-11-03,Long,QC Flagged,40,1,Stress,0,40,,6,0,6,unscorable_missing_outcome,,,,,,
-2026-11-03,Long,No Unusual Volume,10,1,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
-2026-11-03,Long,No Unusual Volume,10,1,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
-2026-11-03,Long,No Unusual Volume,40,1,Base,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
-2026-11-03,Long,No Unusual Volume,40,1,Stress,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
+2026-11-03,Long,All,10,1,Base,10,10,1.0,10,0,0,complete,0.027298978971337727,0.02229235061040038,0.026298978971337726,0.026298978971337726,0.8,0.8
+2026-11-03,Long,All,10,1,Stress,10,10,1.0,10,0,0,complete,0.027298978971337727,0.02229235061040038,0.024798978971337725,0.024798978971337725,0.8,0.8
+2026-11-03,Long,All,40,1,Base,40,40,1.0,40,0,0,complete,0.012697693656743777,0.007691065295806429,0.011697693656743776,0.011697693656743776,0.725,0.725
+2026-11-03,Long,All,40,1,Stress,40,40,1.0,40,0,0,complete,0.012697693656743777,0.007691065295806429,0.010197693656743775,0.010197693656743775,0.725,0.725
+2026-11-03,Long,QC Clear,10,1,Base,10,10,1.0,10,0,0,complete,0.027298978971337727,0.02229235061040038,0.026298978971337726,0.026298978971337726,0.8,0.8
+2026-11-03,Long,QC Clear,10,1,Stress,10,10,1.0,10,0,0,complete,0.027298978971337727,0.02229235061040038,0.024798978971337725,0.024798978971337725,0.8,0.8
+2026-11-03,Long,QC Clear,40,1,Base,40,40,1.0,40,0,0,complete,0.012217946290529321,0.007211317929591973,0.01121794629052932,0.01121794629052932,0.7,0.7
+2026-11-03,Long,QC Clear,40,1,Stress,40,40,1.0,40,0,0,complete,0.012217946290529321,0.007211317929591973,0.00971794629052932,0.00971794629052932,0.7,0.7
+2026-11-03,Long,QC Flagged,10,1,Base,6,10,0.6,6,0,0,complete,-0.01058659753214487,-0.013590574548707279,-0.011186597532144871,-0.01864432922024145,0.3333333333333333,0.3333333333333333
+2026-11-03,Long,QC Flagged,10,1,Stress,6,10,0.6,6,0,0,complete,-0.01058659753214487,-0.013590574548707279,-0.01208659753214487,-0.020144329220241453,0.3333333333333333,0.3333333333333333
+2026-11-03,Long,QC Flagged,40,1,Base,6,40,0.15,6,0,0,complete,-0.0026466493830362174,-0.0033976436371768197,-0.0027966493830362178,-0.01864432922024145,0.3333333333333333,0.3333333333333333
+2026-11-03,Long,QC Flagged,40,1,Stress,6,40,0.15,6,0,0,complete,-0.0026466493830362174,-0.0033976436371768197,-0.0030216493830362177,-0.020144329220241453,0.3333333333333333,0.3333333333333333
+2026-11-03,Long,No Unusual Volume,10,1,Base,10,10,1.0,10,0,0,complete,0.027298978971337727,0.02229235061040038,0.026298978971337726,0.026298978971337726,0.8,0.8
+2026-11-03,Long,No Unusual Volume,10,1,Stress,10,10,1.0,10,0,0,complete,0.027298978971337727,0.02229235061040038,0.024798978971337725,0.024798978971337725,0.8,0.8
+2026-11-03,Long,No Unusual Volume,40,1,Base,40,40,1.0,40,0,0,complete,0.012697693656743777,0.007691065295806429,0.011697693656743776,0.011697693656743776,0.725,0.725
+2026-11-03,Long,No Unusual Volume,40,1,Stress,40,40,1.0,40,0,0,complete,0.012697693656743777,0.007691065295806429,0.010197693656743775,0.010197693656743775,0.725,0.725
 2026-11-03,Long,Unusual Volume,10,1,Base,0,10,0.0,0,0,0,no_candidates,0.0,0.0,0.0,,,
 2026-11-03,Long,Unusual Volume,10,1,Stress,0,10,0.0,0,0,0,no_candidates,0.0,0.0,0.0,,,
 2026-11-03,Long,Unusual Volume,40,1,Base,0,40,0.0,0,0,0,no_candidates,0.0,0.0,0.0,,,
 2026-11-03,Long,Unusual Volume,40,1,Stress,0,40,0.0,0,0,0,no_candidates,0.0,0.0,0.0,,,
-2026-11-03,Short,All,10,1,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
-2026-11-03,Short,All,10,1,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
-2026-11-03,Short,All,40,1,Base,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
-2026-11-03,Short,All,40,1,Stress,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
-2026-11-03,Short,QC Clear,10,1,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
-2026-11-03,Short,QC Clear,10,1,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
-2026-11-03,Short,QC Clear,40,1,Base,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
-2026-11-03,Short,QC Clear,40,1,Stress,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
-2026-11-03,Short,QC Flagged,10,1,Base,0,10,,8,0,8,unscorable_missing_outcome,,,,,,
-2026-11-03,Short,QC Flagged,10,1,Stress,0,10,,8,0,8,unscorable_missing_outcome,,,,,,
-2026-11-03,Short,QC Flagged,40,1,Base,0,40,,8,0,8,unscorable_missing_outcome,,,,,,
-2026-11-03,Short,QC Flagged,40,1,Stress,0,40,,8,0,8,unscorable_missing_outcome,,,,,,
-2026-11-03,Short,No Unusual Volume,10,1,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
-2026-11-03,Short,No Unusual Volume,10,1,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
-2026-11-03,Short,No Unusual Volume,40,1,Base,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
-2026-11-03,Short,No Unusual Volume,40,1,Stress,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
+2026-11-03,Short,All,10,1,Base,10,10,1.0,10,0,0,complete,0.008471842304591304,0.013478470665528652,0.007352794685543687,0.007352794685543687,0.4,0.4
+2026-11-03,Short,All,10,1,Stress,10,10,1.0,10,0,0,complete,0.008471842304591304,0.013478470665528652,0.005575016907765906,0.005575016907765906,0.4,0.4
+2026-11-03,Short,All,40,1,Base,40,40,1.0,40,0,0,complete,0.004148874607829348,0.009155502968766696,0.0030298269887817286,0.0030298269887817286,0.475,0.475
+2026-11-03,Short,All,40,1,Stress,40,40,1.0,40,0,0,complete,0.004148874607829348,0.009155502968766696,0.0012520492110039499,0.0012520492110039499,0.475,0.45
+2026-11-03,Short,QC Clear,10,1,Base,10,10,1.0,10,0,0,complete,-0.002066699570770991,0.0029399287901663573,-0.003185747189818609,-0.003185747189818609,0.3,0.3
+2026-11-03,Short,QC Clear,10,1,Stress,10,10,1.0,10,0,0,complete,-0.002066699570770991,0.0029399287901663573,-0.004963524967596389,-0.004963524967596389,0.3,0.3
+2026-11-03,Short,QC Clear,40,1,Base,40,40,1.0,40,0,0,complete,0.00010168649628884418,0.005108314857226193,-0.0010173611227587754,-0.0010173611227587754,0.475,0.475
+2026-11-03,Short,QC Clear,40,1,Stress,40,40,1.0,40,0,0,complete,0.00010168649628884418,0.005108314857226193,-0.0027951389005365533,-0.0027951389005365533,0.475,0.45
+2026-11-03,Short,QC Flagged,10,1,Base,8,10,0.8,8,0,0,complete,0.019328611649367566,0.023333914338117445,0.01843337355412947,0.023041716942661838,0.625,0.5
+2026-11-03,Short,QC Flagged,10,1,Stress,8,10,0.8,8,0,0,complete,0.019328611649367566,0.023333914338117445,0.017011151331907247,0.02126393916488406,0.625,0.5
+2026-11-03,Short,QC Flagged,40,1,Base,8,40,0.2,8,0,0,complete,0.004832152912341891,0.005833478584529361,0.004608343388532368,0.023041716942661838,0.625,0.5
+2026-11-03,Short,QC Flagged,40,1,Stress,8,40,0.2,8,0,0,complete,0.004832152912341891,0.005833478584529361,0.004252787832976812,0.02126393916488406,0.625,0.5
+2026-11-03,Short,No Unusual Volume,10,1,Base,10,10,1.0,10,0,0,complete,0.008471842304591304,0.013478470665528652,0.007352794685543687,0.007352794685543687,0.4,0.4
+2026-11-03,Short,No Unusual Volume,10,1,Stress,10,10,1.0,10,0,0,complete,0.008471842304591304,0.013478470665528652,0.005575016907765906,0.005575016907765906,0.4,0.4
+2026-11-03,Short,No Unusual Volume,40,1,Base,40,40,1.0,40,0,0,complete,0.004148874607829348,0.009155502968766696,0.0030298269887817286,0.0030298269887817286,0.475,0.475
+2026-11-03,Short,No Unusual Volume,40,1,Stress,40,40,1.0,40,0,0,complete,0.004148874607829348,0.009155502968766696,0.0012520492110039499,0.0012520492110039499,0.475,0.45
 2026-11-03,Short,Unusual Volume,10,1,Base,0,10,0.0,0,0,0,no_candidates,0.0,0.0,0.0,,,
 2026-11-03,Short,Unusual Volume,10,1,Stress,0,10,0.0,0,0,0,no_candidates,0.0,0.0,0.0,,,
 2026-11-03,Short,Unusual Volume,40,1,Base,0,40,0.0,0,0,0,no_candidates,0.0,0.0,0.0,,,
@@ -1099,62 +1099,62 @@ SignalDate,Direction,QCGroup,TopK,Horizon,CostScenario,NTrades,TargetSlots,SlotC
 2026-10-30,Long,Unusual Volume,10,3,Stress,0,10,,2,1,0,pending_outcomes,,,,,,
 2026-10-30,Long,Unusual Volume,40,3,Base,0,40,,2,1,0,pending_outcomes,,,,,,
 2026-10-30,Long,Unusual Volume,40,3,Stress,0,40,,2,1,0,pending_outcomes,,,,,,
-2026-10-30,Short,All,10,3,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
-2026-10-30,Short,All,10,3,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
-2026-10-30,Short,All,40,3,Base,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
-2026-10-30,Short,All,40,3,Stress,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
-2026-10-30,Short,QC Clear,10,3,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
-2026-10-30,Short,QC Clear,10,3,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
-2026-10-30,Short,QC Clear,40,3,Base,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
-2026-10-30,Short,QC Clear,40,3,Stress,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
-2026-10-30,Short,QC Flagged,10,3,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
-2026-10-30,Short,QC Flagged,10,3,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-10-30,Short,All,10,3,Base,10,10,1.0,10,0,0,complete,-0.04449469406797454,-0.03480348959992304,-0.04585183692511739,-0.04585183692511739,0.3,0.2
+2026-10-30,Short,All,10,3,Stress,10,10,1.0,10,0,0,complete,-0.04449469406797454,-0.03480348959992304,-0.04818517025845073,-0.04818517025845073,0.3,0.2
+2026-10-30,Short,All,40,3,Base,40,40,1.0,40,0,0,complete,-0.03951820017383758,-0.029826995705786084,-0.040875343030980435,-0.040875343030980435,0.225,0.2
+2026-10-30,Short,All,40,3,Stress,40,40,1.0,40,0,0,complete,-0.03951820017383758,-0.029826995705786084,-0.04320867636431377,-0.04320867636431377,0.225,0.2
+2026-10-30,Short,QC Clear,10,3,Base,10,10,1.0,10,0,0,complete,-0.03944952754580618,-0.029758323077754688,-0.04080667040294904,-0.04080667040294904,0.3,0.2
+2026-10-30,Short,QC Clear,10,3,Stress,10,10,1.0,10,0,0,complete,-0.03944952754580618,-0.029758323077754688,-0.04314000373628237,-0.04314000373628237,0.3,0.2
+2026-10-30,Short,QC Clear,40,3,Base,40,40,1.0,40,0,0,complete,-0.038068484418906756,-0.02837727995085526,-0.03942562727604961,-0.03942562727604961,0.225,0.2
+2026-10-30,Short,QC Clear,40,3,Stress,40,40,1.0,40,0,0,complete,-0.038068484418906756,-0.02837727995085526,-0.041758960609382945,-0.041758960609382945,0.225,0.2
+2026-10-30,Short,QC Flagged,10,3,Base,10,10,1.0,10,0,0,complete,-0.04042090189528987,-0.030729697427238377,-0.04177804475243273,-0.04177804475243273,0.3,0.3
+2026-10-30,Short,QC Flagged,10,3,Stress,10,10,1.0,10,0,0,complete,-0.04042090189528987,-0.030729697427238377,-0.04411137808576606,-0.04411137808576606,0.3,0.3
 2026-10-30,Short,QC Flagged,40,3,Base,0,40,,21,1,0,pending_outcomes,,,,,,
 2026-10-30,Short,QC Flagged,40,3,Stress,0,40,,21,1,0,pending_outcomes,,,,,,
-2026-10-30,Short,No Unusual Volume,10,3,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
-2026-10-30,Short,No Unusual Volume,10,3,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
-2026-10-30,Short,No Unusual Volume,40,3,Base,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
-2026-10-30,Short,No Unusual Volume,40,3,Stress,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
+2026-10-30,Short,No Unusual Volume,10,3,Base,10,10,1.0,10,0,0,complete,-0.04449469406797454,-0.03480348959992304,-0.04585183692511739,-0.04585183692511739,0.3,0.2
+2026-10-30,Short,No Unusual Volume,10,3,Stress,10,10,1.0,10,0,0,complete,-0.04449469406797454,-0.03480348959992304,-0.04818517025845073,-0.04818517025845073,0.3,0.2
+2026-10-30,Short,No Unusual Volume,40,3,Base,40,40,1.0,40,0,0,complete,-0.03951820017383758,-0.029826995705786084,-0.040875343030980435,-0.040875343030980435,0.225,0.2
+2026-10-30,Short,No Unusual Volume,40,3,Stress,40,40,1.0,40,0,0,complete,-0.03951820017383758,-0.029826995705786084,-0.04320867636431377,-0.04320867636431377,0.225,0.2
 2026-10-30,Short,Unusual Volume,10,3,Base,0,10,,2,1,0,pending_outcomes,,,,,,
 2026-10-30,Short,Unusual Volume,10,3,Stress,0,10,,2,1,0,pending_outcomes,,,,,,
 2026-10-30,Short,Unusual Volume,40,3,Base,0,40,,2,1,0,pending_outcomes,,,,,,
 2026-10-30,Short,Unusual Volume,40,3,Stress,0,40,,2,1,0,pending_outcomes,,,,,,
-2026-11-02,Long,All,10,3,Base,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-11-02,Long,All,10,3,Stress,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-11-02,Long,All,40,3,Base,0,40,,40,40,0,pending_outcomes,,,,,,
-2026-11-02,Long,All,40,3,Stress,0,40,,40,40,0,pending_outcomes,,,,,,
-2026-11-02,Long,QC Clear,10,3,Base,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-11-02,Long,QC Clear,10,3,Stress,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-11-02,Long,QC Clear,40,3,Base,0,40,,40,40,0,pending_outcomes,,,,,,
-2026-11-02,Long,QC Clear,40,3,Stress,0,40,,40,40,0,pending_outcomes,,,,,,
-2026-11-02,Long,QC Flagged,10,3,Base,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-11-02,Long,QC Flagged,10,3,Stress,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-11-02,Long,QC Flagged,40,3,Base,0,40,,11,11,0,pending_outcomes,,,,,,
-2026-11-02,Long,QC Flagged,40,3,Stress,0,40,,11,11,0,pending_outcomes,,,,,,
-2026-11-02,Long,No Unusual Volume,10,3,Base,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-11-02,Long,No Unusual Volume,10,3,Stress,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-11-02,Long,No Unusual Volume,40,3,Base,0,40,,40,40,0,pending_outcomes,,,,,,
-2026-11-02,Long,No Unusual Volume,40,3,Stress,0,40,,40,40,0,pending_outcomes,,,,,,
-2026-11-02,Long,Unusual Volume,10,3,Base,0,10,,1,1,0,pending_outcomes,,,,,,
-2026-11-02,Long,Unusual Volume,10,3,Stress,0,10,,1,1,0,pending_outcomes,,,,,,
-2026-11-02,Long,Unusual Volume,40,3,Base,0,40,,1,1,0,pending_outcomes,,,,,,
-2026-11-02,Long,Unusual Volume,40,3,Stress,0,40,,1,1,0,pending_outcomes,,,,,,
-2026-11-02,Short,All,10,3,Base,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-11-02,Short,All,10,3,Stress,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-11-02,Short,All,40,3,Base,0,40,,40,40,0,pending_outcomes,,,,,,
-2026-11-02,Short,All,40,3,Stress,0,40,,40,40,0,pending_outcomes,,,,,,
-2026-11-02,Short,QC Clear,10,3,Base,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-11-02,Short,QC Clear,10,3,Stress,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-11-02,Short,QC Clear,40,3,Base,0,40,,40,40,0,pending_outcomes,,,,,,
-2026-11-02,Short,QC Clear,40,3,Stress,0,40,,40,40,0,pending_outcomes,,,,,,
-2026-11-02,Short,QC Flagged,10,3,Base,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-11-02,Short,QC Flagged,10,3,Stress,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-11-02,Short,QC Flagged,40,3,Base,0,40,,15,15,0,pending_outcomes,,,,,,
-2026-11-02,Short,QC Flagged,40,3,Stress,0,40,,15,15,0,pending_outcomes,,,,,,
-2026-11-02,Short,No Unusual Volume,10,3,Base,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-11-02,Short,No Unusual Volume,10,3,Stress,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-11-02,Short,No Unusual Volume,40,3,Base,0,40,,40,40,0,pending_outcomes,,,,,,
-2026-11-02,Short,No Unusual Volume,40,3,Stress,0,40,,40,40,0,pending_outcomes,,,,,,
+2026-11-02,Long,All,10,3,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-11-02,Long,All,10,3,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-11-02,Long,All,40,3,Base,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
+2026-11-02,Long,All,40,3,Stress,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
+2026-11-02,Long,QC Clear,10,3,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-11-02,Long,QC Clear,10,3,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-11-02,Long,QC Clear,40,3,Base,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
+2026-11-02,Long,QC Clear,40,3,Stress,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
+2026-11-02,Long,QC Flagged,10,3,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-11-02,Long,QC Flagged,10,3,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-11-02,Long,QC Flagged,40,3,Base,0,40,,11,0,11,unscorable_missing_outcome,,,,,,
+2026-11-02,Long,QC Flagged,40,3,Stress,0,40,,11,0,11,unscorable_missing_outcome,,,,,,
+2026-11-02,Long,No Unusual Volume,10,3,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-11-02,Long,No Unusual Volume,10,3,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-11-02,Long,No Unusual Volume,40,3,Base,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
+2026-11-02,Long,No Unusual Volume,40,3,Stress,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
+2026-11-02,Long,Unusual Volume,10,3,Base,0,10,,1,0,1,unscorable_missing_outcome,,,,,,
+2026-11-02,Long,Unusual Volume,10,3,Stress,0,10,,1,0,1,unscorable_missing_outcome,,,,,,
+2026-11-02,Long,Unusual Volume,40,3,Base,0,40,,1,0,1,unscorable_missing_outcome,,,,,,
+2026-11-02,Long,Unusual Volume,40,3,Stress,0,40,,1,0,1,unscorable_missing_outcome,,,,,,
+2026-11-02,Short,All,10,3,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-11-02,Short,All,10,3,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-11-02,Short,All,40,3,Base,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
+2026-11-02,Short,All,40,3,Stress,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
+2026-11-02,Short,QC Clear,10,3,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-11-02,Short,QC Clear,10,3,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-11-02,Short,QC Clear,40,3,Base,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
+2026-11-02,Short,QC Clear,40,3,Stress,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
+2026-11-02,Short,QC Flagged,10,3,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-11-02,Short,QC Flagged,10,3,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-11-02,Short,QC Flagged,40,3,Base,0,40,,15,0,15,unscorable_missing_outcome,,,,,,
+2026-11-02,Short,QC Flagged,40,3,Stress,0,40,,15,0,15,unscorable_missing_outcome,,,,,,
+2026-11-02,Short,No Unusual Volume,10,3,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-11-02,Short,No Unusual Volume,10,3,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-11-02,Short,No Unusual Volume,40,3,Base,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
+2026-11-02,Short,No Unusual Volume,40,3,Stress,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
 2026-11-02,Short,Unusual Volume,10,3,Base,0,10,0.0,0,0,0,no_candidates,0.0,0.0,0.0,,,
 2026-11-02,Short,Unusual Volume,10,3,Stress,0,10,0.0,0,0,0,no_candidates,0.0,0.0,0.0,,,
 2026-11-02,Short,Unusual Volume,40,3,Base,0,40,0.0,0,0,0,no_candidates,0.0,0.0,0.0,,,
@@ -1607,78 +1607,78 @@ SignalDate,Direction,QCGroup,TopK,Horizon,CostScenario,NTrades,TargetSlots,SlotC
 2026-10-28,Long,QC Clear,10,5,Stress,0,10,,10,1,0,pending_outcomes,,,,,,
 2026-10-28,Long,QC Clear,40,5,Base,0,40,,40,1,0,pending_outcomes,,,,,,
 2026-10-28,Long,QC Clear,40,5,Stress,0,40,,40,1,0,pending_outcomes,,,,,,
-2026-10-28,Long,QC Flagged,10,5,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
-2026-10-28,Long,QC Flagged,10,5,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
-2026-10-28,Long,QC Flagged,40,5,Base,0,40,,14,0,14,unscorable_missing_outcome,,,,,,
-2026-10-28,Long,QC Flagged,40,5,Stress,0,40,,14,0,14,unscorable_missing_outcome,,,,,,
+2026-10-28,Long,QC Flagged,10,5,Base,10,10,1.0,10,0,0,complete,0.024594404421182447,0.027169854837212137,0.023594404421182446,0.023594404421182446,0.7,0.7
+2026-10-28,Long,QC Flagged,10,5,Stress,10,10,1.0,10,0,0,complete,0.024594404421182447,0.027169854837212137,0.022094404421182445,0.022094404421182445,0.7,0.7
+2026-10-28,Long,QC Flagged,40,5,Base,14,40,0.35,14,0,0,complete,0.0031234773957427324,0.004024885041353124,0.0027734773957427323,0.00792422113069352,0.6428571428571429,0.6428571428571429
+2026-10-28,Long,QC Flagged,40,5,Stress,14,40,0.35,14,0,0,complete,0.0031234773957427324,0.004024885041353124,0.0022484773957427316,0.006424221130693519,0.6428571428571429,0.6428571428571429
 2026-10-28,Long,No Unusual Volume,10,5,Base,0,10,,10,1,0,pending_outcomes,,,,,,
 2026-10-28,Long,No Unusual Volume,10,5,Stress,0,10,,10,1,0,pending_outcomes,,,,,,
 2026-10-28,Long,No Unusual Volume,40,5,Base,0,40,,40,1,0,pending_outcomes,,,,,,
 2026-10-28,Long,No Unusual Volume,40,5,Stress,0,40,,40,1,0,pending_outcomes,,,,,,
-2026-10-28,Long,Unusual Volume,10,5,Base,0,10,,1,0,1,unscorable_missing_outcome,,,,,,
-2026-10-28,Long,Unusual Volume,10,5,Stress,0,10,,1,0,1,unscorable_missing_outcome,,,,,,
-2026-10-28,Long,Unusual Volume,40,5,Base,0,40,,1,0,1,unscorable_missing_outcome,,,,,,
-2026-10-28,Long,Unusual Volume,40,5,Stress,0,40,,1,0,1,unscorable_missing_outcome,,,,,,
-2026-10-28,Short,All,10,5,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
-2026-10-28,Short,All,10,5,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
-2026-10-28,Short,All,40,5,Base,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
-2026-10-28,Short,All,40,5,Stress,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
+2026-10-28,Long,Unusual Volume,10,5,Base,1,10,0.1,1,0,0,complete,-0.002545973137274804,-0.002288428095671835,-0.002645973137274804,-0.02645973137274804,0.0,0.0
+2026-10-28,Long,Unusual Volume,10,5,Stress,1,10,0.1,1,0,0,complete,-0.002545973137274804,-0.002288428095671835,-0.0027959731372748037,-0.02795973137274804,0.0,0.0
+2026-10-28,Long,Unusual Volume,40,5,Base,1,40,0.025,1,0,0,complete,-0.000636493284318701,-0.0005721070239179587,-0.000661493284318701,-0.02645973137274804,0.0,0.0
+2026-10-28,Long,Unusual Volume,40,5,Stress,1,40,0.025,1,0,0,complete,-0.000636493284318701,-0.0005721070239179587,-0.0006989932843187009,-0.02795973137274804,0.0,0.0
+2026-10-28,Short,All,10,5,Base,10,10,1.0,10,0,0,complete,-0.0809305493236537,-0.0835059997396834,-0.0825257874188918,-0.0825257874188918,0.1,0.1
+2026-10-28,Short,All,10,5,Stress,10,10,1.0,10,0,0,complete,-0.0809305493236537,-0.0835059997396834,-0.08541467630778068,-0.08541467630778068,0.1,0.1
+2026-10-28,Short,All,40,5,Base,40,40,1.0,40,0,0,complete,-0.03620227392122984,-0.03877772433725953,-0.037797512016467937,-0.037797512016467937,0.275,0.275
+2026-10-28,Short,All,40,5,Stress,40,40,1.0,40,0,0,complete,-0.03620227392122984,-0.03877772433725953,-0.04068640090535682,-0.04068640090535682,0.275,0.275
 2026-10-28,Short,QC Clear,10,5,Base,0,10,0.0,0,0,0,no_candidates,0.0,0.0,0.0,,,
 2026-10-28,Short,QC Clear,10,5,Stress,0,10,0.0,0,0,0,no_candidates,0.0,0.0,0.0,,,
 2026-10-28,Short,QC Clear,40,5,Base,0,40,0.0,0,0,0,no_candidates,0.0,0.0,0.0,,,
 2026-10-28,Short,QC Clear,40,5,Stress,0,40,0.0,0,0,0,no_candidates,0.0,0.0,0.0,,,
-2026-10-28,Short,QC Flagged,10,5,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
-2026-10-28,Short,QC Flagged,10,5,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
-2026-10-28,Short,QC Flagged,40,5,Base,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
-2026-10-28,Short,QC Flagged,40,5,Stress,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
-2026-10-28,Short,No Unusual Volume,10,5,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
-2026-10-28,Short,No Unusual Volume,10,5,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
-2026-10-28,Short,No Unusual Volume,40,5,Base,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
-2026-10-28,Short,No Unusual Volume,40,5,Stress,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
-2026-10-28,Short,Unusual Volume,10,5,Base,0,10,,2,0,2,unscorable_missing_outcome,,,,,,
-2026-10-28,Short,Unusual Volume,10,5,Stress,0,10,,2,0,2,unscorable_missing_outcome,,,,,,
-2026-10-28,Short,Unusual Volume,40,5,Base,0,40,,2,0,2,unscorable_missing_outcome,,,,,,
-2026-10-28,Short,Unusual Volume,40,5,Stress,0,40,,2,0,2,unscorable_missing_outcome,,,,,,
-2026-10-29,Long,All,10,5,Base,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-10-29,Long,All,10,5,Stress,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-10-29,Long,All,40,5,Base,0,40,,40,40,0,pending_outcomes,,,,,,
-2026-10-29,Long,All,40,5,Stress,0,40,,40,40,0,pending_outcomes,,,,,,
-2026-10-29,Long,QC Clear,10,5,Base,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-10-29,Long,QC Clear,10,5,Stress,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-10-29,Long,QC Clear,40,5,Base,0,40,,40,40,0,pending_outcomes,,,,,,
-2026-10-29,Long,QC Clear,40,5,Stress,0,40,,40,40,0,pending_outcomes,,,,,,
-2026-10-29,Long,QC Flagged,10,5,Base,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-10-29,Long,QC Flagged,10,5,Stress,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-10-29,Long,QC Flagged,40,5,Base,0,40,,19,19,0,pending_outcomes,,,,,,
-2026-10-29,Long,QC Flagged,40,5,Stress,0,40,,19,19,0,pending_outcomes,,,,,,
-2026-10-29,Long,No Unusual Volume,10,5,Base,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-10-29,Long,No Unusual Volume,10,5,Stress,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-10-29,Long,No Unusual Volume,40,5,Base,0,40,,40,40,0,pending_outcomes,,,,,,
-2026-10-29,Long,No Unusual Volume,40,5,Stress,0,40,,40,40,0,pending_outcomes,,,,,,
-2026-10-29,Long,Unusual Volume,10,5,Base,0,10,,3,3,0,pending_outcomes,,,,,,
-2026-10-29,Long,Unusual Volume,10,5,Stress,0,10,,3,3,0,pending_outcomes,,,,,,
-2026-10-29,Long,Unusual Volume,40,5,Base,0,40,,3,3,0,pending_outcomes,,,,,,
-2026-10-29,Long,Unusual Volume,40,5,Stress,0,40,,3,3,0,pending_outcomes,,,,,,
-2026-10-29,Short,All,10,5,Base,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-10-29,Short,All,10,5,Stress,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-10-29,Short,All,40,5,Base,0,40,,40,40,0,pending_outcomes,,,,,,
-2026-10-29,Short,All,40,5,Stress,0,40,,40,40,0,pending_outcomes,,,,,,
+2026-10-28,Short,QC Flagged,10,5,Base,10,10,1.0,10,0,0,complete,-0.0809305493236537,-0.0835059997396834,-0.0825257874188918,-0.0825257874188918,0.1,0.1
+2026-10-28,Short,QC Flagged,10,5,Stress,10,10,1.0,10,0,0,complete,-0.0809305493236537,-0.0835059997396834,-0.08541467630778068,-0.08541467630778068,0.1,0.1
+2026-10-28,Short,QC Flagged,40,5,Base,40,40,1.0,40,0,0,complete,-0.03620227392122984,-0.03877772433725953,-0.037797512016467937,-0.037797512016467937,0.275,0.275
+2026-10-28,Short,QC Flagged,40,5,Stress,40,40,1.0,40,0,0,complete,-0.03620227392122984,-0.03877772433725953,-0.04068640090535682,-0.04068640090535682,0.275,0.275
+2026-10-28,Short,No Unusual Volume,10,5,Base,10,10,1.0,10,0,0,complete,-0.09277084139675776,-0.09534629181278745,-0.09436607949199585,-0.09436607949199585,0.0,0.0
+2026-10-28,Short,No Unusual Volume,10,5,Stress,10,10,1.0,10,0,0,complete,-0.09277084139675776,-0.09534629181278745,-0.09725496838088474,-0.09725496838088474,0.0,0.0
+2026-10-28,Short,No Unusual Volume,40,5,Base,40,40,1.0,40,0,0,complete,-0.038493525155337355,-0.041068975571367045,-0.04008876325057545,-0.04008876325057545,0.275,0.275
+2026-10-28,Short,No Unusual Volume,40,5,Stress,40,40,1.0,40,0,0,complete,-0.038493525155337355,-0.041068975571367045,-0.042977652139464334,-0.042977652139464334,0.275,0.25
+2026-10-28,Short,Unusual Volume,10,5,Base,2,10,0.2,2,0,0,complete,-0.0056430896387483775,-0.0061581797219543155,-0.0059621372577959965,-0.029810686288979982,0.5,0.5
+2026-10-28,Short,Unusual Volume,10,5,Stress,2,10,0.2,2,0,0,complete,-0.0056430896387483775,-0.0061581797219543155,-0.006539915035573773,-0.03269957517786887,0.5,0.5
+2026-10-28,Short,Unusual Volume,40,5,Base,2,40,0.05,2,0,0,complete,-0.0014107724096870944,-0.0015395449304885789,-0.0014905343144489991,-0.029810686288979982,0.5,0.5
+2026-10-28,Short,Unusual Volume,40,5,Stress,2,40,0.05,2,0,0,complete,-0.0014107724096870944,-0.0015395449304885789,-0.0016349787588934434,-0.03269957517786887,0.5,0.5
+2026-10-29,Long,All,10,5,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-10-29,Long,All,10,5,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-10-29,Long,All,40,5,Base,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
+2026-10-29,Long,All,40,5,Stress,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
+2026-10-29,Long,QC Clear,10,5,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-10-29,Long,QC Clear,10,5,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-10-29,Long,QC Clear,40,5,Base,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
+2026-10-29,Long,QC Clear,40,5,Stress,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
+2026-10-29,Long,QC Flagged,10,5,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-10-29,Long,QC Flagged,10,5,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-10-29,Long,QC Flagged,40,5,Base,0,40,,19,0,19,unscorable_missing_outcome,,,,,,
+2026-10-29,Long,QC Flagged,40,5,Stress,0,40,,19,0,19,unscorable_missing_outcome,,,,,,
+2026-10-29,Long,No Unusual Volume,10,5,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-10-29,Long,No Unusual Volume,10,5,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-10-29,Long,No Unusual Volume,40,5,Base,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
+2026-10-29,Long,No Unusual Volume,40,5,Stress,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
+2026-10-29,Long,Unusual Volume,10,5,Base,0,10,,3,0,3,unscorable_missing_outcome,,,,,,
+2026-10-29,Long,Unusual Volume,10,5,Stress,0,10,,3,0,3,unscorable_missing_outcome,,,,,,
+2026-10-29,Long,Unusual Volume,40,5,Base,0,40,,3,0,3,unscorable_missing_outcome,,,,,,
+2026-10-29,Long,Unusual Volume,40,5,Stress,0,40,,3,0,3,unscorable_missing_outcome,,,,,,
+2026-10-29,Short,All,10,5,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-10-29,Short,All,10,5,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-10-29,Short,All,40,5,Base,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
+2026-10-29,Short,All,40,5,Stress,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
 2026-10-29,Short,QC Clear,10,5,Base,0,10,0.0,0,0,0,no_candidates,0.0,0.0,0.0,,,
 2026-10-29,Short,QC Clear,10,5,Stress,0,10,0.0,0,0,0,no_candidates,0.0,0.0,0.0,,,
 2026-10-29,Short,QC Clear,40,5,Base,0,40,0.0,0,0,0,no_candidates,0.0,0.0,0.0,,,
 2026-10-29,Short,QC Clear,40,5,Stress,0,40,0.0,0,0,0,no_candidates,0.0,0.0,0.0,,,
-2026-10-29,Short,QC Flagged,10,5,Base,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-10-29,Short,QC Flagged,10,5,Stress,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-10-29,Short,QC Flagged,40,5,Base,0,40,,40,40,0,pending_outcomes,,,,,,
-2026-10-29,Short,QC Flagged,40,5,Stress,0,40,,40,40,0,pending_outcomes,,,,,,
-2026-10-29,Short,No Unusual Volume,10,5,Base,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-10-29,Short,No Unusual Volume,10,5,Stress,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-10-29,Short,No Unusual Volume,40,5,Base,0,40,,40,40,0,pending_outcomes,,,,,,
-2026-10-29,Short,No Unusual Volume,40,5,Stress,0,40,,40,40,0,pending_outcomes,,,,,,
-2026-10-29,Short,Unusual Volume,10,5,Base,0,10,,2,2,0,pending_outcomes,,,,,,
-2026-10-29,Short,Unusual Volume,10,5,Stress,0,10,,2,2,0,pending_outcomes,,,,,,
-2026-10-29,Short,Unusual Volume,40,5,Base,0,40,,2,2,0,pending_outcomes,,,,,,
-2026-10-29,Short,Unusual Volume,40,5,Stress,0,40,,2,2,0,pending_outcomes,,,,,,
+2026-10-29,Short,QC Flagged,10,5,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-10-29,Short,QC Flagged,10,5,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-10-29,Short,QC Flagged,40,5,Base,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
+2026-10-29,Short,QC Flagged,40,5,Stress,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
+2026-10-29,Short,No Unusual Volume,10,5,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-10-29,Short,No Unusual Volume,10,5,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-10-29,Short,No Unusual Volume,40,5,Base,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
+2026-10-29,Short,No Unusual Volume,40,5,Stress,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
+2026-10-29,Short,Unusual Volume,10,5,Base,0,10,,2,0,2,unscorable_missing_outcome,,,,,,
+2026-10-29,Short,Unusual Volume,10,5,Stress,0,10,,2,0,2,unscorable_missing_outcome,,,,,,
+2026-10-29,Short,Unusual Volume,40,5,Base,0,40,,2,0,2,unscorable_missing_outcome,,,,,,
+2026-10-29,Short,Unusual Volume,40,5,Stress,0,40,,2,0,2,unscorable_missing_outcome,,,,,,
 2026-10-30,Long,All,10,5,Base,0,10,,10,10,0,pending_outcomes,,,,,,
 2026-10-30,Long,All,10,5,Stress,0,10,,10,10,0,pending_outcomes,,,,,,
 2026-10-30,Long,All,40,5,Base,0,40,,40,40,0,pending_outcomes,,,,,,
@@ -2007,10 +2007,10 @@ SignalDate,Direction,QCGroup,TopK,Horizon,CostScenario,NTrades,TargetSlots,SlotC
 2026-10-21,Long,QC Clear,10,10,Stress,0,10,,10,1,0,pending_outcomes,,,,,,
 2026-10-21,Long,QC Clear,40,10,Base,0,40,,40,1,0,pending_outcomes,,,,,,
 2026-10-21,Long,QC Clear,40,10,Stress,0,40,,40,1,0,pending_outcomes,,,,,,
-2026-10-21,Long,QC Flagged,10,10,Base,0,10,,2,0,2,unscorable_missing_outcome,,,,,,
-2026-10-21,Long,QC Flagged,10,10,Stress,0,10,,2,0,2,unscorable_missing_outcome,,,,,,
-2026-10-21,Long,QC Flagged,40,10,Base,0,40,,2,0,2,unscorable_missing_outcome,,,,,,
-2026-10-21,Long,QC Flagged,40,10,Stress,0,40,,2,0,2,unscorable_missing_outcome,,,,,,
+2026-10-21,Long,QC Flagged,10,10,Base,2,10,0.2,2,0,0,complete,0.012073215469377585,0.011958387789742498,0.011873215469377585,0.059366077346887924,1.0,1.0
+2026-10-21,Long,QC Flagged,10,10,Stress,2,10,0.2,2,0,0,complete,0.012073215469377585,0.011958387789742498,0.011573215469377585,0.05786607734688792,1.0,1.0
+2026-10-21,Long,QC Flagged,40,10,Base,2,40,0.05,2,0,0,complete,0.0030183038673443963,0.0029895969474356245,0.0029683038673443962,0.059366077346887924,1.0,1.0
+2026-10-21,Long,QC Flagged,40,10,Stress,2,40,0.05,2,0,0,complete,0.0030183038673443963,0.0029895969474356245,0.0028933038673443962,0.05786607734688792,1.0,1.0
 2026-10-21,Long,No Unusual Volume,10,10,Base,0,10,,10,1,0,pending_outcomes,,,,,,
 2026-10-21,Long,No Unusual Volume,10,10,Stress,0,10,,10,1,0,pending_outcomes,,,,,,
 2026-10-21,Long,No Unusual Volume,40,10,Base,0,40,,40,1,0,pending_outcomes,,,,,,
@@ -2019,66 +2019,66 @@ SignalDate,Direction,QCGroup,TopK,Horizon,CostScenario,NTrades,TargetSlots,SlotC
 2026-10-21,Long,Unusual Volume,10,10,Stress,0,10,0.0,0,0,0,no_candidates,0.0,0.0,0.0,,,
 2026-10-21,Long,Unusual Volume,40,10,Base,0,40,0.0,0,0,0,no_candidates,0.0,0.0,0.0,,,
 2026-10-21,Long,Unusual Volume,40,10,Stress,0,40,0.0,0,0,0,no_candidates,0.0,0.0,0.0,,,
-2026-10-21,Short,All,10,10,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
-2026-10-21,Short,All,10,10,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
-2026-10-21,Short,All,40,10,Base,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
-2026-10-21,Short,All,40,10,Stress,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
+2026-10-21,Short,All,10,10,Base,10,10,1.0,10,0,0,complete,-0.10069089429453448,-0.10011675589635904,-0.10288137048501067,-0.10288137048501067,0.0,0.0
+2026-10-21,Short,All,10,10,Stress,10,10,1.0,10,0,0,complete,-0.10069089429453448,-0.10011675589635904,-0.10715914826278845,-0.10715914826278845,0.0,0.0
+2026-10-21,Short,All,40,10,Base,40,40,1.0,40,0,0,complete,-0.06659578539357314,-0.0660216469953977,-0.06878626158404932,-0.06878626158404932,0.175,0.175
+2026-10-21,Short,All,40,10,Stress,40,40,1.0,40,0,0,complete,-0.06659578539357314,-0.0660216469953977,-0.07306403936182712,-0.07306403936182712,0.175,0.15
 2026-10-21,Short,QC Clear,10,10,Base,0,10,0.0,0,0,0,no_candidates,0.0,0.0,0.0,,,
 2026-10-21,Short,QC Clear,10,10,Stress,0,10,0.0,0,0,0,no_candidates,0.0,0.0,0.0,,,
 2026-10-21,Short,QC Clear,40,10,Base,0,40,0.0,0,0,0,no_candidates,0.0,0.0,0.0,,,
 2026-10-21,Short,QC Clear,40,10,Stress,0,40,0.0,0,0,0,no_candidates,0.0,0.0,0.0,,,
-2026-10-21,Short,QC Flagged,10,10,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
-2026-10-21,Short,QC Flagged,10,10,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
-2026-10-21,Short,QC Flagged,40,10,Base,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
-2026-10-21,Short,QC Flagged,40,10,Stress,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
-2026-10-21,Short,No Unusual Volume,10,10,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
-2026-10-21,Short,No Unusual Volume,10,10,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
-2026-10-21,Short,No Unusual Volume,40,10,Base,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
-2026-10-21,Short,No Unusual Volume,40,10,Stress,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
-2026-10-21,Short,Unusual Volume,10,10,Base,0,10,,3,0,3,unscorable_missing_outcome,,,,,,
-2026-10-21,Short,Unusual Volume,10,10,Stress,0,10,,3,0,3,unscorable_missing_outcome,,,,,,
-2026-10-21,Short,Unusual Volume,40,10,Base,0,40,,3,0,3,unscorable_missing_outcome,,,,,,
-2026-10-21,Short,Unusual Volume,40,10,Stress,0,40,,3,0,3,unscorable_missing_outcome,,,,,,
-2026-10-22,Long,All,10,10,Base,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-10-22,Long,All,10,10,Stress,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-10-22,Long,All,40,10,Base,0,40,,40,40,0,pending_outcomes,,,,,,
-2026-10-22,Long,All,40,10,Stress,0,40,,40,40,0,pending_outcomes,,,,,,
-2026-10-22,Long,QC Clear,10,10,Base,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-10-22,Long,QC Clear,10,10,Stress,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-10-22,Long,QC Clear,40,10,Base,0,40,,40,40,0,pending_outcomes,,,,,,
-2026-10-22,Long,QC Clear,40,10,Stress,0,40,,40,40,0,pending_outcomes,,,,,,
-2026-10-22,Long,QC Flagged,10,10,Base,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-10-22,Long,QC Flagged,10,10,Stress,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-10-22,Long,QC Flagged,40,10,Base,0,40,,12,12,0,pending_outcomes,,,,,,
-2026-10-22,Long,QC Flagged,40,10,Stress,0,40,,12,12,0,pending_outcomes,,,,,,
-2026-10-22,Long,No Unusual Volume,10,10,Base,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-10-22,Long,No Unusual Volume,10,10,Stress,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-10-22,Long,No Unusual Volume,40,10,Base,0,40,,40,40,0,pending_outcomes,,,,,,
-2026-10-22,Long,No Unusual Volume,40,10,Stress,0,40,,40,40,0,pending_outcomes,,,,,,
+2026-10-21,Short,QC Flagged,10,10,Base,10,10,1.0,10,0,0,complete,-0.10069089429453448,-0.10011675589635904,-0.10288137048501067,-0.10288137048501067,0.0,0.0
+2026-10-21,Short,QC Flagged,10,10,Stress,10,10,1.0,10,0,0,complete,-0.10069089429453448,-0.10011675589635904,-0.10715914826278845,-0.10715914826278845,0.0,0.0
+2026-10-21,Short,QC Flagged,40,10,Base,40,40,1.0,40,0,0,complete,-0.06659578539357314,-0.0660216469953977,-0.06878626158404932,-0.06878626158404932,0.175,0.175
+2026-10-21,Short,QC Flagged,40,10,Stress,40,40,1.0,40,0,0,complete,-0.06659578539357314,-0.0660216469953977,-0.07306403936182712,-0.07306403936182712,0.175,0.15
+2026-10-21,Short,No Unusual Volume,10,10,Base,10,10,1.0,10,0,0,complete,-0.11040780170553939,-0.10983366330736395,-0.11259827789601558,-0.11259827789601558,0.0,0.0
+2026-10-21,Short,No Unusual Volume,10,10,Stress,10,10,1.0,10,0,0,complete,-0.11040780170553939,-0.10983366330736395,-0.11687605567379333,-0.11687605567379333,0.0,0.0
+2026-10-21,Short,No Unusual Volume,40,10,Base,40,40,1.0,40,0,0,complete,-0.07401871496383744,-0.073444576565662,-0.07620919115431363,-0.07620919115431363,0.15,0.15
+2026-10-21,Short,No Unusual Volume,40,10,Stress,40,40,1.0,40,0,0,complete,-0.07401871496383744,-0.073444576565662,-0.08048696893209141,-0.08048696893209141,0.15,0.125
+2026-10-21,Short,Unusual Volume,10,10,Base,3,10,0.3,3,0,0,complete,0.016618381039522456,0.016790622558975087,0.0159612381823796,0.05320412727459867,0.6666666666666666,0.6666666666666666
+2026-10-21,Short,Unusual Volume,10,10,Stress,3,10,0.3,3,0,0,complete,0.016618381039522456,0.016790622558975087,0.014677904849046266,0.04892634949682089,0.6666666666666666,0.6666666666666666
+2026-10-21,Short,Unusual Volume,40,10,Base,3,40,0.075,3,0,0,complete,0.004154595259880614,0.004197655639743772,0.0039903095455949,0.05320412727459867,0.6666666666666666,0.6666666666666666
+2026-10-21,Short,Unusual Volume,40,10,Stress,3,40,0.075,3,0,0,complete,0.004154595259880614,0.004197655639743772,0.0036694762122615665,0.04892634949682089,0.6666666666666666,0.6666666666666666
+2026-10-22,Long,All,10,10,Base,0,10,,10,1,0,pending_outcomes,,,,,,
+2026-10-22,Long,All,10,10,Stress,0,10,,10,1,0,pending_outcomes,,,,,,
+2026-10-22,Long,All,40,10,Base,0,40,,40,1,0,pending_outcomes,,,,,,
+2026-10-22,Long,All,40,10,Stress,0,40,,40,1,0,pending_outcomes,,,,,,
+2026-10-22,Long,QC Clear,10,10,Base,0,10,,10,1,0,pending_outcomes,,,,,,
+2026-10-22,Long,QC Clear,10,10,Stress,0,10,,10,1,0,pending_outcomes,,,,,,
+2026-10-22,Long,QC Clear,40,10,Base,0,40,,40,1,0,pending_outcomes,,,,,,
+2026-10-22,Long,QC Clear,40,10,Stress,0,40,,40,1,0,pending_outcomes,,,,,,
+2026-10-22,Long,QC Flagged,10,10,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-10-22,Long,QC Flagged,10,10,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-10-22,Long,QC Flagged,40,10,Base,0,40,,12,0,12,unscorable_missing_outcome,,,,,,
+2026-10-22,Long,QC Flagged,40,10,Stress,0,40,,12,0,12,unscorable_missing_outcome,,,,,,
+2026-10-22,Long,No Unusual Volume,10,10,Base,0,10,,10,1,0,pending_outcomes,,,,,,
+2026-10-22,Long,No Unusual Volume,10,10,Stress,0,10,,10,1,0,pending_outcomes,,,,,,
+2026-10-22,Long,No Unusual Volume,40,10,Base,0,40,,40,1,0,pending_outcomes,,,,,,
+2026-10-22,Long,No Unusual Volume,40,10,Stress,0,40,,40,1,0,pending_outcomes,,,,,,
 2026-10-22,Long,Unusual Volume,10,10,Base,0,10,0.0,0,0,0,no_candidates,0.0,0.0,0.0,,,
 2026-10-22,Long,Unusual Volume,10,10,Stress,0,10,0.0,0,0,0,no_candidates,0.0,0.0,0.0,,,
 2026-10-22,Long,Unusual Volume,40,10,Base,0,40,0.0,0,0,0,no_candidates,0.0,0.0,0.0,,,
 2026-10-22,Long,Unusual Volume,40,10,Stress,0,40,0.0,0,0,0,no_candidates,0.0,0.0,0.0,,,
-2026-10-22,Short,All,10,10,Base,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-10-22,Short,All,10,10,Stress,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-10-22,Short,All,40,10,Base,0,40,,40,40,0,pending_outcomes,,,,,,
-2026-10-22,Short,All,40,10,Stress,0,40,,40,40,0,pending_outcomes,,,,,,
-2026-10-22,Short,QC Clear,10,10,Base,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-10-22,Short,QC Clear,10,10,Stress,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-10-22,Short,QC Clear,40,10,Base,0,40,,40,40,0,pending_outcomes,,,,,,
-2026-10-22,Short,QC Clear,40,10,Stress,0,40,,40,40,0,pending_outcomes,,,,,,
-2026-10-22,Short,QC Flagged,10,10,Base,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-10-22,Short,QC Flagged,10,10,Stress,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-10-22,Short,QC Flagged,40,10,Base,0,40,,36,36,0,pending_outcomes,,,,,,
-2026-10-22,Short,QC Flagged,40,10,Stress,0,40,,36,36,0,pending_outcomes,,,,,,
-2026-10-22,Short,No Unusual Volume,10,10,Base,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-10-22,Short,No Unusual Volume,10,10,Stress,0,10,,10,10,0,pending_outcomes,,,,,,
-2026-10-22,Short,No Unusual Volume,40,10,Base,0,40,,40,40,0,pending_outcomes,,,,,,
-2026-10-22,Short,No Unusual Volume,40,10,Stress,0,40,,40,40,0,pending_outcomes,,,,,,
-2026-10-22,Short,Unusual Volume,10,10,Base,0,10,,3,3,0,pending_outcomes,,,,,,
-2026-10-22,Short,Unusual Volume,10,10,Stress,0,10,,3,3,0,pending_outcomes,,,,,,
-2026-10-22,Short,Unusual Volume,40,10,Base,0,40,,3,3,0,pending_outcomes,,,,,,
-2026-10-22,Short,Unusual Volume,40,10,Stress,0,40,,3,3,0,pending_outcomes,,,,,,
+2026-10-22,Short,All,10,10,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-10-22,Short,All,10,10,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-10-22,Short,All,40,10,Base,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
+2026-10-22,Short,All,40,10,Stress,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
+2026-10-22,Short,QC Clear,10,10,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-10-22,Short,QC Clear,10,10,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-10-22,Short,QC Clear,40,10,Base,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
+2026-10-22,Short,QC Clear,40,10,Stress,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
+2026-10-22,Short,QC Flagged,10,10,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-10-22,Short,QC Flagged,10,10,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-10-22,Short,QC Flagged,40,10,Base,0,40,,36,0,36,unscorable_missing_outcome,,,,,,
+2026-10-22,Short,QC Flagged,40,10,Stress,0,40,,36,0,36,unscorable_missing_outcome,,,,,,
+2026-10-22,Short,No Unusual Volume,10,10,Base,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-10-22,Short,No Unusual Volume,10,10,Stress,0,10,,10,0,10,unscorable_missing_outcome,,,,,,
+2026-10-22,Short,No Unusual Volume,40,10,Base,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
+2026-10-22,Short,No Unusual Volume,40,10,Stress,0,40,,40,0,40,unscorable_missing_outcome,,,,,,
+2026-10-22,Short,Unusual Volume,10,10,Base,0,10,,3,0,3,unscorable_missing_outcome,,,,,,
+2026-10-22,Short,Unusual Volume,10,10,Stress,0,10,,3,0,3,unscorable_missing_outcome,,,,,,
+2026-10-22,Short,Unusual Volume,40,10,Base,0,40,,3,0,3,unscorable_missing_outcome,,,,,,
+2026-10-22,Short,Unusual Volume,40,10,Stress,0,40,,3,0,3,unscorable_missing_outcome,,,,,,
 2026-10-23,Long,All,10,10,Base,0,10,,10,10,0,pending_outcomes,,,,,,
 2026-10-23,Long,All,10,10,Stress,0,10,,10,10,0,pending_outcomes,,,,,,
 2026-10-23,Long,All,40,10,Base,0,40,,40,40,0,pending_outcomes,,,,,,

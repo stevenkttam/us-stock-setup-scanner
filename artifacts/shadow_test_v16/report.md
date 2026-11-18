@@ -2,7 +2,7 @@
 
 - Status: **success**
 - Research only: **True**
-- Latest market date: **2026-11-16**
+- Latest market date: **2026-11-17**
 - Signal events: **4,061** across **15** signal dates
 - Long / Short: **2,150 / 1,911**
 - New events added on this run: **0**
@@ -14,7 +14,7 @@
 | 1 sessions | 4,057 | 4 | 0 |
 | 3 sessions | 4,052 | 9 | 0 |
 | 5 sessions | 4,048 | 11 | 2 |
-| 10 sessions | 3,898 | 163 | 0 |
+| 10 sessions | 4,045 | 16 | 0 |
 
 ## Primary portfolio view
 

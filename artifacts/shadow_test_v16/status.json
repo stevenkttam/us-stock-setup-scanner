@@ -4,7 +4,7 @@
   "research_only": true,
   "production_ready": false,
   "new_signals_added_this_run": 0,
-  "signal_seed_note": "refusing stale/non-session snapshot: signal date 2026-11-19 does not match scheduled run date 2026-11-20",
+  "signal_seed_note": "refusing stale/non-session snapshot: signal date 2026-11-20 does not match scheduled run date 2026-11-21",
   "allow_new_signals": true,
   "ledger_events": 4061,
   "unique_signal_dates": 15,
@@ -54,10 +54,10 @@
   },
   "outcome_update_counts_this_run": {
     "complete": 0,
-    "pending": 3834,
+    "pending": 3361,
     "invalid": 0
   },
-  "latest_market_date": "2026-11-19",
+  "latest_market_date": "2026-11-20",
   "cost_assumptions": {
     "Base": {
       "round_trip_cost_bps": 10.0,

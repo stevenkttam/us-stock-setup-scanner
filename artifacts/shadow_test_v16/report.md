@@ -2,7 +2,7 @@
 
 - Status: **success**
 - Research only: **True**
-- Latest market date: **2026-11-20**
+- Latest market date: **2026-11-23**
 - Signal events: **4,061** across **15** signal dates
 - Long / Short: **2,150 / 1,911**
 - New events added on this run: **0**

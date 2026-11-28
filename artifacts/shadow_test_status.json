@@ -4,7 +4,7 @@
   "research_only": true,
   "production_ready": false,
   "new_signals_added_this_run": 0,
-  "signal_seed_note": "refusing stale/non-session snapshot: signal date 2026-11-25 does not match scheduled run date 2026-11-27",
+  "signal_seed_note": "refusing stale/non-session snapshot: signal date 2026-11-27 does not match scheduled run date 2026-11-28",
   "allow_new_signals": true,
   "ledger_events": 4061,
   "unique_signal_dates": 15,
@@ -19,8 +19,8 @@
   "pending_3d_outcomes": 9,
   "invalid_3d_outcomes": 0,
   "completed_5d_outcomes": 4048,
-  "pending_5d_outcomes": 10,
-  "invalid_5d_outcomes": 3,
+  "pending_5d_outcomes": 11,
+  "invalid_5d_outcomes": 2,
   "completed_10d_outcomes": 4045,
   "pending_10d_outcomes": 16,
   "invalid_10d_outcomes": 0,
@@ -37,8 +37,8 @@
     },
     "5": {
       "complete": 4048,
-      "pending": 10,
-      "invalid": 3
+      "pending": 11,
+      "invalid": 2
     },
     "10": {
       "complete": 4045,
@@ -54,10 +54,10 @@
   },
   "outcome_update_counts_this_run": {
     "complete": 0,
-    "pending": 3674,
+    "pending": 4023,
     "invalid": 0
   },
-  "latest_market_date": "2026-11-25",
+  "latest_market_date": "2026-11-27",
   "cost_assumptions": {
     "Base": {
       "round_trip_cost_bps": 10.0,
